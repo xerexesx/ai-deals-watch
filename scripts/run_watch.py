@@ -42,7 +42,7 @@ GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "32768"))
 DISCORD_CONTENT_LIMIT = 1900  # Discord content max is 2000; keep margin.
 DISCORD_SUMMARY_LIMIT = 1850
 DISCORD_ATTACH_FULL_REPORT = os.getenv("DISCORD_ATTACH_FULL_REPORT", "true").lower() == "true"
-DISCORD_MAX_MESSAGES = int(os.getenv("DISCORD_MAX_MESSAGES", "8"))
+DISCORD_MAX_MESSAGES = int(os.getenv("DISCORD_MAX_MESSAGES", "0"))  # 0 = no silent cap; keep every Discord chunk.
 
 ALLOWED_REGIONS = {"Monde", "Europe", "US-only", "Région limitée", "Non précisé"}
 
@@ -486,30 +486,49 @@ def split_text(text: str, limit: int = DISCORD_CONTENT_LIMIT) -> list[str]:
     return chunks
 
 
-def discord_safe_line(text: str, max_chars: int = 160) -> str:
-    """Keep Discord notifications readable and compact."""
+def discord_clean_text(text: Any, default: str = "non précisé") -> str:
+    """Normalize text for Discord without cutting information mid-sentence."""
     text = re.sub(r"\s+", " ", str(text or "")).strip()
     text = text.replace("[`", "(").replace("`]", ")")
-    if len(text) <= max_chars:
-        return text
-    return text[: max_chars - 1].rstrip() + "…"
+    return text or default
 
 
-def compact_offer_line(prefix: str, offer: dict[str, Any], include_link: bool = False) -> str:
+def discord_safe_line(text: str, max_chars: int = 160) -> str:
+    """Backward-compatible helper: no Discord truncation, only normalization."""
+    return discord_clean_text(text)
+
+
+def has_real_info(text: Any) -> bool:
+    value = discord_clean_text(text, default="")
+    return bool(value and value.lower() not in {"non précisé", "non precise", "n/a", "na", "none"})
+
+
+def compact_offer_line(prefix: str, offer: dict[str, Any], include_link: bool = False, include_conditions: bool = False) -> str:
+    """Readable Discord block. No ellipsis, no mid-sentence cuts, spaced lines."""
     score = offer.get("usage_score", "?")
     rank = offer.get("rank", "?")
-    gain = discord_safe_line(offer.get("gain", "non précisé"), 95)
-    trap = discord_safe_line(offer.get("problems_traps", "non précisé"), 80)
-    line = (
-        f"{prefix} **#{rank} {discord_safe_line(offer.get('offer'), 70)}** — "
-        f"{discord_safe_line(offer.get('provider'), 35)} | {score}/5\n"
-        f"↳ {gain}"
-    )
-    if trap and trap != "non précisé":
-        line += f" | ⚠️ {trap}"
+
+    title = discord_clean_text(offer.get("offer"))
+    provider = discord_clean_text(offer.get("provider"))
+    gain = discord_clean_text(offer.get("gain"))
+    conditions = discord_clean_text(offer.get("conditions_limits"))
+    trap = discord_clean_text(offer.get("problems_traps"))
+
+    lines = [
+        f"{prefix} **#{rank} {provider}** — {title} | {score}/5",
+        f"↳ Gain : {gain}",
+    ]
+
+    if include_conditions and has_real_info(conditions):
+        lines.append(f"📌 Limites : {conditions}")
+
+    if has_real_info(trap):
+        lines.append(f"⚠️ Pièges : {trap}")
+
     if include_link and valid_url(str(offer.get("official_link", ""))):
-        line += f"\n{offer['official_link']}"
-    return line
+        lines.append(str(offer["official_link"]))
+
+    return "\n".join(lines)
 
 
 def pick_top_offers(payload: dict[str, Any], limit: int = 5) -> list[dict[str, Any]]:
@@ -521,6 +540,7 @@ def pick_top_offers(payload: dict[str, Any], limit: int = 5) -> list[dict[str, A
 def build_discord_overview(diff: DiffResult, payload: dict[str, Any]) -> str:
     lines = [
         "🚨 **Veille bons plans IA**",
+        "",
         f"🆕 **{len(diff.new_offers)}** nouvelles | ♻️ **{len(diff.modified_offers)}** modifiées | 🗑️ **{len(diff.removed_offers)}** sorties",
         f"📦 Offres retenues dans le rapport : **{len(payload.get('offers', []))}**",
         "📎 Rapport complet en pièce jointe `.md`",
@@ -529,44 +549,52 @@ def build_discord_overview(diff: DiffResult, payload: dict[str, Any]) -> str:
 
     if diff.changed:
         lines.append("🏆 **Top usage réel**")
+        lines.append("")
         for offer in pick_top_offers(payload, 5):
-            lines.append(compact_offer_line("•", offer, include_link=False))
+            lines.append(compact_offer_line("•", offer, include_link=False, include_conditions=False))
+            lines.append("")
     else:
         lines.append("Aucun changement détecté. Rapport complet régénéré en pièce jointe.")
+        lines.append("")
 
     if payload.get("watchlist"):
-        lines += ["", "👀 **À surveiller**"]
-        for item in payload["watchlist"][:3]:
-            lines.append(f"• {discord_safe_line(item, 180)}")
+        lines.append("👀 **À surveiller**")
+        lines.append("")
+        for item in payload["watchlist"][:5]:
+            lines.append(f"• {discord_clean_text(item)}")
+        lines.append("")
 
-    text = "\n".join(lines)
-    return text[:DISCORD_SUMMARY_LIMIT]
+    text = "\n".join(lines).strip()
+    chunks = split_text(text, limit=DISCORD_SUMMARY_LIMIT)
+    return chunks[0] if chunks else text
 
 
 def build_discord_changes_list(diff: DiffResult) -> list[str]:
-    """Build compact change messages. Every changed/new offer should appear at least by name."""
+    """Build readable change messages. New/modified offers are not silently cut."""
     if not diff.changed:
         return []
 
     sections: list[str] = []
 
     if diff.new_offers:
-        lines = ["🆕 **Nouveautés détectées**"]
+        lines = ["🆕 **Nouveautés détectées**", ""]
         for offer in sorted(diff.new_offers, key=lambda o: safe_int(o.get("rank"), 999, 1, 999)):
-            lines.append(compact_offer_line("•", offer, include_link=False))
-        sections.extend(split_text("\n".join(lines), limit=DISCORD_CONTENT_LIMIT))
+            lines.append(compact_offer_line("•", offer, include_link=False, include_conditions=True))
+            lines.append("")
+        sections.extend(split_text("\n".join(lines).strip(), limit=DISCORD_CONTENT_LIMIT))
 
     if diff.modified_offers:
-        lines = ["♻️ **Offres modifiées**"]
+        lines = ["♻️ **Offres modifiées**", ""]
         for offer in sorted(diff.modified_offers, key=lambda o: safe_int(o.get("rank"), 999, 1, 999)):
-            lines.append(compact_offer_line("•", offer, include_link=False))
-        sections.extend(split_text("\n".join(lines), limit=DISCORD_CONTENT_LIMIT))
+            lines.append(compact_offer_line("•", offer, include_link=False, include_conditions=True))
+            lines.append("")
+        sections.extend(split_text("\n".join(lines).strip(), limit=DISCORD_CONTENT_LIMIT))
 
     if diff.removed_offers:
-        lines = ["🗑️ **Sorties du top**"]
+        lines = ["🗑️ **Sorties du top**", ""]
         for offer in diff.removed_offers:
-            lines.append(f"• {discord_safe_line(offer.get('offer'), 80)} — {discord_safe_line(offer.get('provider'), 40)}")
-        sections.extend(split_text("\n".join(lines), limit=DISCORD_CONTENT_LIMIT))
+            lines.append(f"• {discord_clean_text(offer.get('offer'))} — {discord_clean_text(offer.get('provider'))}")
+        sections.extend(split_text("\n".join(lines).strip(), limit=DISCORD_CONTENT_LIMIT))
 
     return sections
 
@@ -574,12 +602,23 @@ def build_discord_changes_list(diff: DiffResult) -> list[str]:
 def build_discord_messages(diff: DiffResult, payload: dict[str, Any]) -> list[str]:
     messages = [build_discord_overview(diff, payload)]
     messages.extend(build_discord_changes_list(diff))
+
     footer = "✅ Détails complets, liens et pièges : voir le fichier Markdown joint."
     if messages and len(messages[-1]) + len(footer) + 2 <= DISCORD_CONTENT_LIMIT:
         messages[-1] += "\n\n" + footer
     else:
         messages.append(footer)
-    return messages[:DISCORD_MAX_MESSAGES]
+
+    if DISCORD_MAX_MESSAGES > 0 and len(messages) > DISCORD_MAX_MESSAGES:
+        # Never cut a sentence inside a message. If the user sets a hard cap, make the truncation explicit.
+        kept = messages[: max(1, DISCORD_MAX_MESSAGES - 1)]
+        kept.append(
+            "⚠️ Notification Discord limitée par DISCORD_MAX_MESSAGES. "
+            "Le rapport complet est disponible en pièce jointe Markdown."
+        )
+        return kept
+
+    return messages
 
 
 def discord_report_filename(diff: DiffResult, payload: dict[str, Any]) -> str:

@@ -143,6 +143,21 @@ class DiscordV4Tests(unittest.TestCase):
             self.assertIn(f"Offer {i}", joined)
         self.assertTrue(all(len(message) <= run_watch.DISCORD_CONTENT_LIMIT for message in messages))
 
+
+    def test_discord_offer_header_puts_provider_first(self):
+        offer = {
+            "rank": 1,
+            "offer": "Free Tier API avec accès à tous les modèles",
+            "provider": "Groq",
+            "gain": "Accès gratuit utile pour prototype",
+            "conditions_limits": "non précisé",
+            "problems_traps": "quota faible possible",
+            "usage_score": 4,
+        }
+        text = run_watch.compact_offer_line("•", offer)
+        self.assertIn("• **#1 Groq** — Free Tier API avec accès à tous les modèles | 4/5", text)
+        self.assertNotIn("#1 Free Tier API", text)
+
     def test_discord_report_filename_contains_counts(self):
         payload = self._payload_many(2)
         diff = run_watch.DiffResult(True, payload["offers"], [], [])
