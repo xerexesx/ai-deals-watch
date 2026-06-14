@@ -1,4 +1,5 @@
 import importlib.util
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -15,6 +16,10 @@ class RunWatchTests(unittest.TestCase):
         text = '```json\n{"offers": [], "best_real_use": []}\n```'
         data = run_watch.extract_json(text)
         self.assertEqual(data["offers"], [])
+
+    def test_extract_json_rejects_truncated_json(self):
+        with self.assertRaises(Exception):
+            run_watch.extract_json('{"offers":[{"offer":"abc}')
 
     def test_split_text_respects_limit(self):
         chunks = run_watch.split_text("a" * 5000, limit=1900)
@@ -78,6 +83,11 @@ class RunWatchTests(unittest.TestCase):
         messages = run_watch.build_discord_messages(diff, payload)
         self.assertTrue(messages)
         self.assertTrue(all(len(message) <= run_watch.DISCORD_CONTENT_LIMIT for message in messages))
+
+    def test_sample_payload_normalizes(self):
+        payload = run_watch.sample_payload()
+        self.assertIn("offers", payload)
+        self.assertEqual(len(payload["offers"]), 1)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,15 @@ name: AI Deals Watch
 
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Tester le workflow sans appeler Gemini"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
   schedule:
     # Mardi 07:17 Europe/Paris
     - cron: "17 7 * * 2"
@@ -36,19 +45,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Validate code without API credits
+        run: |
+          python -m py_compile scripts/run_watch.py
+          python -m unittest discover -s tests
+
       - name: Run watch
         id: watch
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          # "true" pour envoyer aussi un message Discord quand rien ne change.
           DISCORD_NOTIFY_NO_CHANGE: "false"
-          # Limite anti-spam. Le rapport complet reste dans reports/latest.md.
           DISCORD_MAX_MESSAGES: "6"
+          AI_DEALS_MAX_OFFERS: "30"
+          GEMINI_MAX_OUTPUT_TOKENS: "32768"
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == 'true' && 'true' || 'false' }}
         run: python scripts/run_watch.py
 
       - name: Commit report if changed
-        if: steps.watch.outputs.changed == 'true'
+        if: steps.watch.outputs.changed == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run == 'true')
         run: |
           git config user.name "ai-deals-bot"
           git config user.email "actions@github.com"
@@ -57,7 +72,7 @@ jobs:
           git push
 
       - name: Create GitHub issue if changed
-        if: steps.watch.outputs.changed == 'true'
+        if: steps.watch.outputs.changed == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run == 'true')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

@@ -9,7 +9,7 @@ Contexte utilisateur :
 - Inclure les offres US-only si elles sont vraiment exceptionnelles.
 
 Objectif :
-Trouver les 30 meilleurs bons plans actuels dans l’univers IA, en priorisant ce qui est réellement exploitable pour du prototypage sérieux ou de la préproduction.
+Trouver les meilleurs bons plans actuels dans l’univers IA, en priorisant ce qui est réellement exploitable pour du prototypage sérieux ou de la préproduction.
 
 Consignes de recherche :
 - Cherche large, puis filtre fort.
@@ -53,7 +53,7 @@ Règles de qualité :
 
 SORTIE OBLIGATOIRE : retourne uniquement un JSON valide, sans markdown, sans texte avant/après.
 
-Schéma exact :
+Schéma exact attendu :
 {
   "generated_title": "string",
   "generated_summary": "string",

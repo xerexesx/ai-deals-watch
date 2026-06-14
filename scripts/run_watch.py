@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
 """AI deals watch.
 
-Pipeline:
-1. Ask Gemini 2.5 Flash-Lite with Google Search grounding for a verified JSON report.
-2. Compare with previous JSON history.
-3. Generate Markdown reports.
-4. Commit via GitHub Actions and optionally notify Discord webhook.
-
-The code is deliberately defensive: it validates/sanitizes model output, avoids Discord
-message limit errors, and retries Discord 429 responses.
+V2 hardening notes:
+- Avoids asking Gemini for a huge, free-form JSON blob.
+- Uses Gemini JSON mode / structured output when available.
+- Keeps every model field short to avoid truncated JSON.
+- Saves raw failed model output for debugging instead of silently losing it.
+- Supports DRY_RUN=true to test GitHub Actions without consuming Gemini credits.
+- Handles Discord content limits with safe chunking and 429 retry handling.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
 import sys
 import time
-import hashlib
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -34,10 +33,15 @@ PROMPT_FILE = ROOT / "prompts" / "research_prompt.md"
 LATEST_JSON = DATA_DIR / "latest.json"
 LATEST_MD = REPORTS_DIR / "latest.md"
 CHANGES_MD = REPORTS_DIR / "changes.md"
+FAILED_RAW_TXT = REPORTS_DIR / "failed_raw_response.txt"
 
 MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
-DISCORD_CONTENT_LIMIT = 1900  # Real limit is 2000; keep margin for safety.
+MAX_OFFERS = int(os.getenv("AI_DEALS_MAX_OFFERS", "30"))
+GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "32768"))
+DISCORD_CONTENT_LIMIT = 1900  # Discord content max is 2000; keep margin.
 DISCORD_MAX_MESSAGES = int(os.getenv("DISCORD_MAX_MESSAGES", "6"))
+
+ALLOWED_REGIONS = {"Monde", "Europe", "US-only", "Région limitée", "Non précisé"}
 
 
 @dataclass
@@ -46,6 +50,69 @@ class DiffResult:
     new_offers: list[dict[str, Any]]
     modified_offers: list[dict[str, Any]]
     removed_offers: list[dict[str, Any]]
+
+
+# Keep the schema intentionally simple. Nested objects/arrays only, no oneOf/anyOf.
+# This is more reliable with Google Search grounding and cheaper to generate than a long prose report.
+GEMINI_RESPONSE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "generated_title": {"type": "string"},
+        "generated_summary": {"type": "string"},
+        "offers": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": MAX_OFFERS,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "rank": {"type": "integer"},
+                    "offer": {"type": "string"},
+                    "provider": {"type": "string"},
+                    "type": {"type": "string"},
+                    "region": {
+                        "type": "string",
+                        "enum": ["Monde", "Europe", "US-only", "Région limitée", "Non précisé"],
+                    },
+                    "gain": {"type": "string"},
+                    "conditions_limits": {"type": "string"},
+                    "problems_traps": {"type": "string"},
+                    "usage_score": {"type": "integer"},
+                    "validity": {"type": "string"},
+                    "official_link": {"type": "string"},
+                    "community_source": {"type": "string"},
+                },
+                "required": [
+                    "rank",
+                    "offer",
+                    "provider",
+                    "type",
+                    "region",
+                    "gain",
+                    "conditions_limits",
+                    "problems_traps",
+                    "usage_score",
+                    "validity",
+                    "official_link",
+                    "community_source",
+                ],
+            },
+        },
+        "best_real_use": {"type": "array", "items": {"type": "string"}, "maxItems": 5},
+        "riskiest_or_unstable": {"type": "array", "items": {"type": "string"}, "maxItems": 5},
+        "watchlist": {"type": "array", "items": {"type": "string"}, "maxItems": 5},
+        "critical_sources_used": {"type": "array", "items": {"type": "string"}, "maxItems": 15},
+    },
+    "required": [
+        "generated_title",
+        "generated_summary",
+        "offers",
+        "best_real_use",
+        "riskiest_or_unstable",
+        "watchlist",
+        "critical_sources_used",
+    ],
+}
 
 
 def utc_now() -> str:
@@ -60,11 +127,19 @@ def stable_json(data: Any) -> str:
     return json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
-def clean_text(value: Any, default: str = "non précisé") -> str:
+def clamp_text(text: str, max_chars: int, default: str = "non précisé") -> str:
+    text = re.sub(r"\s+", " ", str(text or "")).strip()
+    if not text:
+        return default
+    if len(text) <= max_chars:
+        return text
+    return text[: max_chars - 1].rstrip() + "…"
+
+
+def clean_text(value: Any, default: str = "non précisé", max_chars: int = 300) -> str:
     if value is None:
         return default
-    text = re.sub(r"\s+", " ", str(value)).strip()
-    return text if text else default
+    return clamp_text(str(value), max_chars=max_chars, default=default)
 
 
 def valid_url(url: str) -> bool:
@@ -76,55 +151,76 @@ def valid_url(url: str) -> bool:
 
 
 def offer_id(offer: dict[str, Any]) -> str:
-    link = clean_text(offer.get("official_link"), "")
-    provider = clean_text(offer.get("provider"), "")
-    name = clean_text(offer.get("offer"), "")
+    link = clean_text(offer.get("official_link"), "", max_chars=500)
+    provider = clean_text(offer.get("provider"), "", max_chars=160)
+    name = clean_text(offer.get("offer"), "", max_chars=160)
     identity = link if valid_url(link) else f"{provider}|{name}"
     return sha256_text(identity.lower())[:16]
 
 
 def offer_fingerprint(offer: dict[str, Any]) -> str:
     relevant = {
-        "offer": clean_text(offer.get("offer")),
-        "provider": clean_text(offer.get("provider")),
-        "type": clean_text(offer.get("type")),
-        "region": clean_text(offer.get("region")),
-        "gain": clean_text(offer.get("gain")),
-        "conditions_limits": clean_text(offer.get("conditions_limits")),
-        "problems_traps": clean_text(offer.get("problems_traps")),
+        "offer": clean_text(offer.get("offer"), max_chars=160),
+        "provider": clean_text(offer.get("provider"), max_chars=100),
+        "type": clean_text(offer.get("type"), max_chars=80),
+        "region": clean_text(offer.get("region"), max_chars=40),
+        "gain": clean_text(offer.get("gain"), max_chars=220),
+        "conditions_limits": clean_text(offer.get("conditions_limits"), max_chars=260),
+        "problems_traps": clean_text(offer.get("problems_traps"), max_chars=260),
         "usage_score": offer.get("usage_score"),
-        "validity": clean_text(offer.get("validity")),
-        "official_link": clean_text(offer.get("official_link")),
-        "community_source": clean_text(offer.get("community_source")),
+        "validity": clean_text(offer.get("validity"), max_chars=80),
+        "official_link": clean_text(offer.get("official_link"), max_chars=500),
+        "community_source": clean_text(offer.get("community_source"), max_chars=220),
     }
     return sha256_text(stable_json(relevant))[:16]
 
 
-def sanitize_offer(raw: dict[str, Any], fallback_rank: int) -> dict[str, Any]:
-    score = raw.get("usage_score", 0)
+def safe_int(value: Any, default: int, minimum: int, maximum: int) -> int:
     try:
-        score = int(score)
+        number = int(value)
     except Exception:
-        score = 0
-    score = max(0, min(5, score))
+        number = default
+    return max(minimum, min(maximum, number))
+
+
+def sanitize_offer(raw: dict[str, Any], fallback_rank: int) -> dict[str, Any]:
+    score = safe_int(raw.get("usage_score"), default=0, minimum=0, maximum=5)
+    rank = safe_int(raw.get("rank"), default=fallback_rank, minimum=1, maximum=999)
+
+    region = clean_text(raw.get("region"), max_chars=40)
+    if region not in ALLOWED_REGIONS:
+        region = "Non précisé"
 
     offer = {
-        "rank": int(raw.get("rank") or fallback_rank),
-        "offer": clean_text(raw.get("offer")),
-        "provider": clean_text(raw.get("provider")),
-        "type": clean_text(raw.get("type")),
-        "region": clean_text(raw.get("region")),
-        "gain": clean_text(raw.get("gain")),
-        "conditions_limits": clean_text(raw.get("conditions_limits")),
-        "problems_traps": clean_text(raw.get("problems_traps")),
+        "rank": rank,
+        "offer": clean_text(raw.get("offer"), max_chars=120),
+        "provider": clean_text(raw.get("provider"), max_chars=80),
+        "type": clean_text(raw.get("type"), max_chars=80),
+        "region": region,
+        "gain": clean_text(raw.get("gain"), max_chars=220),
+        "conditions_limits": clean_text(raw.get("conditions_limits"), max_chars=260),
+        "problems_traps": clean_text(raw.get("problems_traps"), max_chars=260),
         "usage_score": score,
-        "validity": clean_text(raw.get("validity")),
-        "official_link": clean_text(raw.get("official_link")),
-        "community_source": clean_text(raw.get("community_source")),
+        "validity": clean_text(raw.get("validity"), max_chars=80),
+        "official_link": clean_text(raw.get("official_link"), max_chars=500),
+        "community_source": clean_text(raw.get("community_source"), max_chars=220),
     }
     offer["id"] = offer_id(offer)
     offer["fingerprint"] = offer_fingerprint(offer)
     return offer
+
+
+def as_str_list(value: Any, limit: int, item_max_chars: int = 180) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    output: list[str] = []
+    for item in value:
+        text = clean_text(item, max_chars=item_max_chars)
+        if text != "non précisé":
+            output.append(text)
+        if len(output) >= limit:
+            break
+    return output
 
 
 def normalize_payload(raw: dict[str, Any]) -> dict[str, Any]:
@@ -132,9 +228,9 @@ def normalize_payload(raw: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(offers_raw, list):
         raise ValueError("Le champ 'offers' doit être une liste.")
 
-    offers = []
-    seen_ids = set()
-    for index, item in enumerate(offers_raw, start=1):
+    offers: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for index, item in enumerate(offers_raw[:MAX_OFFERS], start=1):
         if not isinstance(item, dict):
             continue
         offer = sanitize_offer(item, index)
@@ -143,42 +239,70 @@ def normalize_payload(raw: dict[str, Any]) -> dict[str, Any]:
         seen_ids.add(offer["id"])
         offers.append(offer)
 
+    if not offers:
+        raise ValueError("Aucune offre exploitable dans la réponse Gemini.")
+
     offers.sort(key=lambda x: x.get("rank", 999))
 
     return {
         "generated_at": utc_now(),
         "model": MODEL,
-        "generated_title": clean_text(raw.get("generated_title"), "Veille bons plans IA"),
-        "generated_summary": clean_text(raw.get("generated_summary"), "non précisé"),
+        "generated_title": clean_text(raw.get("generated_title"), "Veille bons plans IA", max_chars=120),
+        "generated_summary": clean_text(raw.get("generated_summary"), max_chars=500),
         "offers": offers,
-        "best_real_use": as_str_list(raw.get("best_real_use"), 5),
-        "riskiest_or_unstable": as_str_list(raw.get("riskiest_or_unstable"), 5),
-        "watchlist": as_str_list(raw.get("watchlist"), 5),
-        "critical_sources_used": as_str_list(raw.get("critical_sources_used"), 20),
+        "best_real_use": as_str_list(raw.get("best_real_use"), 5, 180),
+        "riskiest_or_unstable": as_str_list(raw.get("riskiest_or_unstable"), 5, 180),
+        "watchlist": as_str_list(raw.get("watchlist"), 5, 180),
+        "critical_sources_used": as_str_list(raw.get("critical_sources_used"), 15, 180),
     }
 
 
-def as_str_list(value: Any, limit: int) -> list[str]:
-    if not isinstance(value, list):
-        return []
-    return [clean_text(x) for x in value if clean_text(x) != "non précisé"][:limit]
-
-
-def extract_json(text: str) -> dict[str, Any]:
-    """Extract JSON even if a model accidentally wraps it in markdown fences."""
+def strip_markdown_fence(text: str) -> str:
     stripped = text.strip()
     if stripped.startswith("```"):
         stripped = re.sub(r"^```(?:json)?\s*", "", stripped, flags=re.I)
         stripped = re.sub(r"\s*```$", "", stripped)
+    return stripped.strip()
+
+
+def save_failed_raw_response(text: str, error: Exception) -> None:
+    REPORTS_DIR.mkdir(exist_ok=True)
+    FAILED_RAW_TXT.write_text(
+        "# Gemini raw response parse failure\n\n"
+        f"Date: {utc_now()}\n"
+        f"Error: {type(error).__name__}: {error}\n\n"
+        "--- RAW RESPONSE START ---\n"
+        f"{text}\n"
+        "--- RAW RESPONSE END ---\n",
+        encoding="utf-8",
+    )
+
+
+def extract_json(text: str) -> dict[str, Any]:
+    """Extract JSON even if a model accidentally wraps it in markdown fences.
+
+    This function is intentionally strict. It does not try to invent missing JSON if
+    the model output was truncated. On failure, the caller stores the raw output.
+    """
+    stripped = strip_markdown_fence(text)
 
     try:
-        return json.loads(stripped)
-    except json.JSONDecodeError:
+        data = json.loads(stripped)
+    except json.JSONDecodeError as first_error:
         start = stripped.find("{")
         end = stripped.rfind("}")
         if start == -1 or end == -1 or end <= start:
-            raise
-        return json.loads(stripped[start : end + 1])
+            raise first_error
+        try:
+            data = json.loads(stripped[start : end + 1])
+        except json.JSONDecodeError as second_error:
+            # Keep the first error context if the whole payload was clearly attempted JSON;
+            # otherwise show the substring error.
+            raise second_error from first_error
+
+    if not isinstance(data, dict):
+        raise ValueError("La réponse JSON doit être un objet racine.")
+    return data
 
 
 def load_previous() -> dict[str, Any] | None:
@@ -211,7 +335,7 @@ def diff_payload(previous: dict[str, Any] | None, current: dict[str, Any]) -> Di
 
 
 def markdown_escape_cell(text: str) -> str:
-    return clean_text(text).replace("|", "\\|")
+    return clean_text(text, max_chars=500).replace("|", "\\|")
 
 
 def build_latest_markdown(payload: dict[str, Any]) -> str:
@@ -269,6 +393,7 @@ def format_offer_for_changes(prefix: str, offer: dict[str, Any]) -> str:
         f"### {prefix} {offer['offer']} — {offer['provider']}\n"
         f"- Type : {offer['type']}\n"
         f"- Région : {offer['region']}\n"
+        f"- Score usage : {offer['usage_score']}/5\n"
         f"- Gain : {offer['gain']}\n"
         f"- Limites : {offer['conditions_limits']}\n"
         f"- Pièges : {offer['problems_traps']}\n"
@@ -308,6 +433,23 @@ def build_changes_markdown(diff: DiffResult, payload: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def split_long_line(line: str, limit: int) -> list[str]:
+    if len(line) <= limit:
+        return [line]
+
+    parts: list[str] = []
+    current = line
+    while len(current) > limit:
+        cut = current.rfind(" ", 0, limit)
+        if cut < limit // 2:
+            cut = limit
+        parts.append(current[:cut].rstrip())
+        current = current[cut:].lstrip()
+    if current:
+        parts.append(current)
+    return parts
+
+
 def split_text(text: str, limit: int = DISCORD_CONTENT_LIMIT) -> list[str]:
     """Split long text into Discord-safe chunks without breaking lines when possible."""
     text = text.strip()
@@ -316,20 +458,15 @@ def split_text(text: str, limit: int = DISCORD_CONTENT_LIMIT) -> list[str]:
 
     chunks: list[str] = []
     current = ""
-    for line in text.splitlines():
-        candidate = line if not current else f"{current}\n{line}"
-        if len(candidate) <= limit:
-            current = candidate
-            continue
-
-        if current:
-            chunks.append(current)
-            current = ""
-
-        while len(line) > limit:
-            chunks.append(line[:limit])
-            line = line[limit:]
-        current = line
+    for original_line in text.splitlines():
+        for line in split_long_line(original_line, limit):
+            candidate = line if not current else f"{current}\n{line}"
+            if len(candidate) <= limit:
+                current = candidate
+            else:
+                if current:
+                    chunks.append(current)
+                current = line
 
     if current:
         chunks.append(current)
@@ -343,7 +480,8 @@ def build_discord_messages(diff: DiffResult, payload: dict[str, Any]) -> list[st
 
     header = (
         f"{title}\n"
-        f"🆕 {len(diff.new_offers)} nouvelles | ♻️ {len(diff.modified_offers)} modifiées | 🗑️ {len(diff.removed_offers)} sorties du top\n"
+        f"🆕 {len(diff.new_offers)} nouvelles | ♻️ {len(diff.modified_offers)} modifiées | "
+        f"🗑️ {len(diff.removed_offers)} sorties du top\n"
         f"Rapport complet : `reports/latest.md`"
     )
 
@@ -390,7 +528,6 @@ def send_discord_message(webhook_url: str, content: str) -> None:
             time.sleep(retry_after + 0.5)
             continue
 
-        # Invalid webhook must not be retried aggressively.
         if response.status_code in {401, 403, 404}:
             raise RuntimeError(f"Discord webhook invalide ou inaccessible: HTTP {response.status_code}")
 
@@ -401,6 +538,10 @@ def send_discord_message(webhook_url: str, content: str) -> None:
 
 
 def notify_discord(diff: DiffResult, payload: dict[str, Any]) -> None:
+    if os.getenv("DRY_RUN", "false").lower() == "true":
+        print("DRY_RUN=true: notification Discord ignorée.")
+        return
+
     webhook = os.getenv("DISCORD_WEBHOOK_URL", "").strip()
     if not webhook:
         print("DISCORD_WEBHOOK_URL absent: notification Discord ignorée.")
@@ -415,7 +556,59 @@ def notify_discord(diff: DiffResult, payload: dict[str, Any]) -> None:
     for index, message in enumerate(messages, start=1):
         send_discord_message(webhook, message)
         print(f"Discord message envoyé {index}/{len(messages)}")
-        time.sleep(1.1)  # simple anti-spam buffer
+        time.sleep(1.1)
+
+
+def build_runtime_prompt() -> str:
+    base = PROMPT_FILE.read_text(encoding="utf-8")
+    guardrails = f"""
+
+CONTRAINTE TECHNIQUE STRICTE POUR AUTOMATISATION :
+- Retourne au maximum {MAX_OFFERS} offres.
+- JSON compact uniquement.
+- Aucun markdown.
+- Aucune phrase hors JSON.
+- Chaque champ texte doit rester court.
+- `gain` <= 180 caractères.
+- `conditions_limits` <= 220 caractères.
+- `problems_traps` <= 220 caractères.
+- `generated_summary` <= 450 caractères.
+- `critical_sources_used` <= 15 éléments.
+- Si une donnée n'est pas confirmée par source officielle, écris "non précisé".
+- Le lien `official_link` doit être une URL officielle directe, pas un article de blog.
+"""
+    return base.strip() + guardrails
+
+
+def get_finish_reason(response: Any) -> str:
+    try:
+        candidates = getattr(response, "candidates", None) or []
+        if not candidates:
+            return "UNKNOWN"
+        finish_reason = getattr(candidates[0], "finish_reason", None)
+        return str(finish_reason or "UNKNOWN")
+    except Exception:
+        return "UNKNOWN"
+
+
+def extract_text_from_response(response: Any) -> str:
+    # python-genai exposes response.text for normal JSON text. Keep fallback for future SDK changes.
+    text = getattr(response, "text", None)
+    if text:
+        return str(text)
+
+    # Best-effort fallback for candidates/parts.
+    parts: list[str] = []
+    try:
+        for candidate in getattr(response, "candidates", []) or []:
+            content = getattr(candidate, "content", None)
+            for part in getattr(content, "parts", []) or []:
+                part_text = getattr(part, "text", None)
+                if part_text:
+                    parts.append(str(part_text))
+    except Exception:
+        pass
+    return "\n".join(parts).strip()
 
 
 def call_gemini(prompt: str) -> str:
@@ -431,24 +624,81 @@ def call_gemini(prompt: str) -> str:
     last_error: Exception | None = None
     for attempt in range(1, 4):
         try:
+            config = types.GenerateContentConfig(
+                tools=[types.Tool(google_search=types.GoogleSearch())],
+                temperature=0.1,
+                max_output_tokens=GEMINI_MAX_OUTPUT_TOKENS,
+                response_mime_type="application/json",
+                response_schema=GEMINI_RESPONSE_SCHEMA,
+            )
             response = client.models.generate_content(
                 model=MODEL,
                 contents=prompt,
-                config=types.GenerateContentConfig(
-                    tools=[types.Tool(google_search=types.GoogleSearch())],
-                    temperature=0.15,
-                ),
+                config=config,
             )
-            if not response.text:
-                raise RuntimeError("Réponse Gemini vide.")
-            return response.text
-        except Exception as exc:  # SDK exceptions vary; keep retry generic.
+            finish_reason = get_finish_reason(response)
+            text = extract_text_from_response(response)
+            if not text:
+                raise RuntimeError(f"Réponse Gemini vide. finish_reason={finish_reason}")
+            if "MAX_TOKENS" in finish_reason.upper():
+                raise RuntimeError(
+                    "Réponse Gemini tronquée par limite max_output_tokens. "
+                    "Réduis AI_DEALS_MAX_OFFERS ou augmente GEMINI_MAX_OUTPUT_TOKENS."
+                )
+            return text
+        except TypeError as exc:
+            # Compatibility fallback for older google-genai versions where response_schema may differ.
             last_error = exc
-            if attempt == 3:
-                break
+            try:
+                config = types.GenerateContentConfig(
+                    tools=[types.Tool(google_search=types.GoogleSearch())],
+                    temperature=0.1,
+                    max_output_tokens=GEMINI_MAX_OUTPUT_TOKENS,
+                    response_mime_type="application/json",
+                )
+                response = client.models.generate_content(model=MODEL, contents=prompt, config=config)
+                text = extract_text_from_response(response)
+                if not text:
+                    raise RuntimeError("Réponse Gemini vide après fallback JSON mode.")
+                return text
+            except Exception as fallback_exc:
+                last_error = fallback_exc
+        except Exception as exc:
+            last_error = exc
+
+        if attempt < 3:
             time.sleep(5 * attempt)
 
     raise RuntimeError(f"Gemini failed after retries: {last_error}")
+
+
+def sample_payload() -> dict[str, Any]:
+    return normalize_payload(
+        {
+            "generated_title": "DRY RUN — Veille bons plans IA",
+            "generated_summary": "Payload de test local sans appel Gemini. Sert à valider GitHub Actions, JSON, Markdown, diff et Discord.",
+            "offers": [
+                {
+                    "rank": 1,
+                    "offer": "Gemini API Free Tier",
+                    "provider": "Google",
+                    "type": "API LLM",
+                    "region": "Monde",
+                    "gain": "Free tier pour tests API selon limites en vigueur.",
+                    "conditions_limits": "Limites variables selon modèle et compte ; vérifier pricing officiel.",
+                    "problems_traps": "Ne pas utiliser pour données privées sensibles en free tier.",
+                    "usage_score": 4,
+                    "validity": "non précisé",
+                    "official_link": "https://ai.google.dev/gemini-api/docs/pricing",
+                    "community_source": "non précisé",
+                }
+            ],
+            "best_real_use": ["Gemini API Free Tier — bon pour prototypage"],
+            "riskiest_or_unstable": ["DRY RUN — aucun risque réel mesuré"],
+            "watchlist": ["Ajouter sources officielles provider par provider"],
+            "critical_sources_used": ["DRY RUN local"],
+        }
+    )
 
 
 def save_outputs(payload: dict[str, Any], latest_md: str, changes_md: str) -> None:
@@ -477,10 +727,24 @@ def write_github_output(diff: DiffResult) -> None:
 
 
 def main() -> int:
-    prompt = PROMPT_FILE.read_text(encoding="utf-8")
-    raw_text = call_gemini(prompt)
-    raw_payload = extract_json(raw_text)
-    payload = normalize_payload(raw_payload)
+    dry_run = os.getenv("DRY_RUN", "false").lower() == "true"
+
+    if dry_run:
+        print("DRY_RUN=true: aucun appel Gemini ne sera effectué.")
+        payload = sample_payload()
+    else:
+        prompt = build_runtime_prompt()
+        raw_text = call_gemini(prompt)
+        try:
+            raw_payload = extract_json(raw_text)
+        except Exception as exc:
+            save_failed_raw_response(raw_text, exc)
+            raise RuntimeError(
+                "Impossible de parser le JSON Gemini. Le brut est sauvegardé dans "
+                "reports/failed_raw_response.txt. "
+                "Cause probable : sortie tronquée ou JSON non respecté par le modèle."
+            ) from exc
+        payload = normalize_payload(raw_payload)
 
     previous = load_previous()
     diff = diff_payload(previous, payload)
