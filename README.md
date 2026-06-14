@@ -45,6 +45,13 @@ La notification Discord est volontairement courte :
 python -m unittest discover -s tests
 ```
 
+## Correction importante Gemini
+
+Cette version n'utilise pas `response_mime_type="application/json"` avec `google_search`.
+La combinaison Google Search tool + JSON MIME est rejetée par l'API Gemini avec `400 INVALID_ARGUMENT`.
+Le script utilise donc Google Search Grounding en sortie texte, demande un JSON compact entre marqueurs, puis valide le JSON localement.
+
+
 ## 6. Notes
 
 Le workflow utilise `timezone: "Europe/Paris"` dans les schedules GitHub Actions. Si votre compte/instance ne supporte pas encore cette option, remplacez par un cron UTC.

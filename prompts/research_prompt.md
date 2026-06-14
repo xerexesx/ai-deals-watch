@@ -51,7 +51,13 @@ Règles de qualité :
 - Mentionner les risques typiques : quota faible, expiration rapide, retrait soudain de free model, 429, instabilité, carte bancaire requise, vérification d’identité, frais réseau / stockage / egress, limites par projet ou organisation, beta instable, waitlist fermée, sélection aléatoire.
 - Favoriser les offres qui servent à construire, pas juste à “jouer”.
 
-SORTIE OBLIGATOIRE : retourne uniquement un JSON valide, sans markdown, sans texte avant/après.
+SORTIE OBLIGATOIRE : retourne uniquement un JSON valide, sans markdown, encadré par les marqueurs exacts ci-dessous.
+
+BEGIN_AI_DEALS_JSON
+{...}
+END_AI_DEALS_JSON
+
+Important : ne mets aucun texte avant BEGIN_AI_DEALS_JSON ni après END_AI_DEALS_JSON.
 
 Schéma exact attendu :
 {

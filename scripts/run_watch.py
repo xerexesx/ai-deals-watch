@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """AI deals watch.
 
-V2 hardening notes:
-- Avoids asking Gemini for a huge, free-form JSON blob.
-- Uses Gemini JSON mode / structured output when available.
-- Keeps every model field short to avoid truncated JSON.
+V3 hardening notes:
+- Uses Gemini Google Search grounding in plain text mode.
+- Does NOT combine Google Search tool with response_mime_type/application_json because the API rejects that combination.
+- Requests compact JSON inside sentinel markers and validates it locally.
+- Keeps every model field short to reduce the risk of truncated JSON.
 - Saves raw failed model output for debugging instead of silently losing it.
 - Supports DRY_RUN=true to test GitHub Actions without consuming Gemini credits.
 - Handles Discord content limits with safe chunking and 429 retry handling.
@@ -279,31 +280,41 @@ def save_failed_raw_response(text: str, error: Exception) -> None:
 
 
 def extract_json(text: str) -> dict[str, Any]:
-    """Extract JSON even if a model accidentally wraps it in markdown fences.
+    """Extract model JSON from plain-text grounded output.
 
-    This function is intentionally strict. It does not try to invent missing JSON if
-    the model output was truncated. On failure, the caller stores the raw output.
+    Gemini Google Search grounding cannot be combined with response_mime_type="application/json".
+    So we ask for compact JSON between sentinel markers and parse it locally.
     """
     stripped = strip_markdown_fence(text)
 
+    # Preferred path: JSON between explicit markers.
+    marker_start = "BEGIN_AI_DEALS_JSON"
+    marker_end = "END_AI_DEALS_JSON"
+    if marker_start in stripped and marker_end in stripped:
+        start = stripped.index(marker_start) + len(marker_start)
+        end = stripped.rindex(marker_end)
+        candidate = stripped[start:end].strip()
+    else:
+        # Fallback path: whole response is JSON, or JSON object is embedded in text.
+        candidate = stripped
+        if not candidate.lstrip().startswith("{"):
+            start = candidate.find("{")
+            end = candidate.rfind("}")
+            if start != -1 and end != -1 and end > start:
+                candidate = candidate[start : end + 1]
+
     try:
-        data = json.loads(stripped)
-    except json.JSONDecodeError as first_error:
-        start = stripped.find("{")
-        end = stripped.rfind("}")
-        if start == -1 or end == -1 or end <= start:
-            raise first_error
-        try:
-            data = json.loads(stripped[start : end + 1])
-        except json.JSONDecodeError as second_error:
-            # Keep the first error context if the whole payload was clearly attempted JSON;
-            # otherwise show the substring error.
-            raise second_error from first_error
+        data = json.loads(candidate)
+    except json.JSONDecodeError as exc:
+        # Do not try to invent missing JSON. A truncated JSON must be visible in failed_raw_response.txt.
+        raise ValueError(
+            f"JSON Gemini invalide ou tronqué: {exc}. "
+            "Le script attend un objet JSON complet entre BEGIN_AI_DEALS_JSON et END_AI_DEALS_JSON."
+        ) from exc
 
     if not isinstance(data, dict):
         raise ValueError("La réponse JSON doit être un objet racine.")
     return data
-
 
 def load_previous() -> dict[str, Any] | None:
     if not LATEST_JSON.exists():
@@ -565,15 +576,20 @@ def build_runtime_prompt() -> str:
 
 CONTRAINTE TECHNIQUE STRICTE POUR AUTOMATISATION :
 - Retourne au maximum {MAX_OFFERS} offres.
-- JSON compact uniquement.
+- Retourne un JSON compact uniquement entre ces deux marqueurs exacts :
+  BEGIN_AI_DEALS_JSON
+  END_AI_DEALS_JSON
 - Aucun markdown.
-- Aucune phrase hors JSON.
+- Aucune phrase avant BEGIN_AI_DEALS_JSON.
+- Aucune phrase après END_AI_DEALS_JSON.
+- Pas de retours ligne dans les chaînes JSON : remplace-les par des espaces.
 - Chaque champ texte doit rester court.
-- `gain` <= 180 caractères.
-- `conditions_limits` <= 220 caractères.
-- `problems_traps` <= 220 caractères.
-- `generated_summary` <= 450 caractères.
-- `critical_sources_used` <= 15 éléments.
+- `offer` <= 90 caractères.
+- `gain` <= 160 caractères.
+- `conditions_limits` <= 190 caractères.
+- `problems_traps` <= 190 caractères.
+- `generated_summary` <= 350 caractères.
+- `critical_sources_used` <= 10 éléments, format court : provider + URL officielle.
 - Si une donnée n'est pas confirmée par source officielle, écris "non précisé".
 - Le lien `official_link` doit être une URL officielle directe, pas un article de blog.
 """
@@ -612,6 +628,11 @@ def extract_text_from_response(response: Any) -> str:
 
 
 def call_gemini(prompt: str) -> str:
+    """Call Gemini with Google Search grounding.
+
+    Important: do not set response_mime_type="application/json" or response_schema here.
+    The Gemini API rejects JSON response MIME type when a tool such as google_search is enabled.
+    """
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError("Secret GEMINI_API_KEY manquant.")
@@ -628,8 +649,6 @@ def call_gemini(prompt: str) -> str:
                 tools=[types.Tool(google_search=types.GoogleSearch())],
                 temperature=0.1,
                 max_output_tokens=GEMINI_MAX_OUTPUT_TOKENS,
-                response_mime_type="application/json",
-                response_schema=GEMINI_RESPONSE_SCHEMA,
             )
             response = client.models.generate_content(
                 model=MODEL,
@@ -646,23 +665,6 @@ def call_gemini(prompt: str) -> str:
                     "Réduis AI_DEALS_MAX_OFFERS ou augmente GEMINI_MAX_OUTPUT_TOKENS."
                 )
             return text
-        except TypeError as exc:
-            # Compatibility fallback for older google-genai versions where response_schema may differ.
-            last_error = exc
-            try:
-                config = types.GenerateContentConfig(
-                    tools=[types.Tool(google_search=types.GoogleSearch())],
-                    temperature=0.1,
-                    max_output_tokens=GEMINI_MAX_OUTPUT_TOKENS,
-                    response_mime_type="application/json",
-                )
-                response = client.models.generate_content(model=MODEL, contents=prompt, config=config)
-                text = extract_text_from_response(response)
-                if not text:
-                    raise RuntimeError("Réponse Gemini vide après fallback JSON mode.")
-                return text
-            except Exception as fallback_exc:
-                last_error = fallback_exc
         except Exception as exc:
             last_error = exc
 
@@ -670,7 +672,6 @@ def call_gemini(prompt: str) -> str:
             time.sleep(5 * attempt)
 
     raise RuntimeError(f"Gemini failed after retries: {last_error}")
-
 
 def sample_payload() -> dict[str, Any]:
     return normalize_payload(

@@ -17,6 +17,19 @@ class RunWatchTests(unittest.TestCase):
         data = run_watch.extract_json(text)
         self.assertEqual(data["offers"], [])
 
+    def test_extract_json_from_sentinel_markers(self):
+        text = 'BEGIN_AI_DEALS_JSON\n{"offers": [], "best_real_use": []}\nEND_AI_DEALS_JSON'
+        data = run_watch.extract_json(text)
+        self.assertEqual(data["offers"], [])
+
+    def test_call_gemini_does_not_force_json_mime_with_google_search(self):
+        source = MODULE_PATH.read_text(encoding="utf-8")
+        self.assertIn("google_search", source)
+        call_section = source[source.index("def call_gemini"):source.index("def sample_payload")]
+        config_section = call_section[call_section.index("config = types.GenerateContentConfig"):call_section.index("response = client.models.generate_content")]
+        self.assertNotIn("response_mime_type", config_section)
+        self.assertNotIn("response_schema", config_section)
+
     def test_extract_json_rejects_truncated_json(self):
         with self.assertRaises(Exception):
             run_watch.extract_json('{"offers":[{"offer":"abc}')
