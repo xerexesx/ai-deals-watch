@@ -1,179 +1,170 @@
 # Changements veille bons plans IA
 
-- Généré le : `2026-06-14T09:13:16+00:00`
-- Nouvelles offres : `17`
-- Offres modifiées : `0`
-- Offres disparues : `0`
+- Généré le : `2026-06-14T11:54:06+00:00`
+- Nouvelles offres : `12`
+- Offres modifiées : `2`
+- Offres disparues : `15`
 
 ## Nouvelles offres
 
-### 🆕 Crédits AWS Activate pour Startups — AWS
-- Type : Crédits Cloud / Startup
+### 🆕 Free Tier API avec accès à tous les modèles — Groq
+- Type : API Inference
 - Région : Monde
 - Score usage : 4/5
-- Gain : Jusqu'à 200 000 $ de crédits AWS. Des crédits supplémentaires sont disponibles pour les startups IA prêtes à passer à l'échelle.
-- Limites : Éligibilité basée sur la phase de l'entreprise (pré-Série B), la date de fondation (moins de 10 ans), la présence d'un site web/profil professionnel, et un compte AWS sur plan payant. Le package Portfolio nécessite un Org ID d'un fournisseur Activate.
-- Pièges : Les crédits ont une date d'expiration. L'approbation est à la discrétion d'AWS. Les crédits peuvent être distribués par tranches.
+- Gain : Accès gratuit à tous les modèles open-source (Llama, Mixtral, Gemma, etc.) avec des vitesses d'inférence très élevées (jusqu'à 1000 tokens/sec).
+- Limites : Limité à 30 requêtes/min, 6000 tokens/min, 14400 requêtes/jour au niveau de l'organisation. Pas de carte bancaire requise pour le free tier.
+- Pièges : Les limites du free tier sont insuffisantes pour la production. Le catalogue est limité aux modèles open-source.
 - Validité : Non précisé
-- Lien : https://aws.amazon.com/activate/
+- Lien : https://console.groq.com/
 
-### 🆕 Programme Cloud Google pour Startups (Crédits IA) — Google Cloud
-- Type : Crédits Cloud / Startup
+### 🆕 Crédits de démarrage gratuits — Together AI
+- Type : API Inference
+- Région : Monde
+- Score usage : 3/5
+- Gain : 5$ de crédits gratuits à l'inscription pour tester divers modèles open-source.
+- Limites : Les crédits sont généralement valides pour 30-90 jours. Nécessite un achat minimum de 5$ pour accéder à la plateforme.
+- Pièges : Nécessite un achat minimum pour activer l'accès. Les crédits gratuits ont une durée de vie limitée.
+- Validité : Non précisé
+- Lien : https://together.ai/
+
+### 🆕 Paiement à l'usage pour l'inférence — Replicate
+- Type : API Inference / GPU Cloud
 - Région : Monde
 - Score usage : 4/5
-- Gain : Jusqu'à 350 000 $ de crédits cloud pour les startups IA (250 000 $ la première année, puis 100 000 $ en remises la deuxième année). Inclut également 12 000 $ de crédits de support amélioré et 12 mois de Google Workspace.
-- Limites : Conçu pour les startups IA, potentiellement avec du financement VC. Les crédits ont une durée d'expiration d'un an. L'éligibilité est à la discrétion de Google Cloud.
-- Pièges : Les crédits sont limités dans le temps. L'approbation peut nécessiter une connexion via un partenaire Google (VC, incubateur).
+- Gain : Paiement à la seconde pour l'utilisation des GPUs (à partir de 0.000025$/sec pour CPU, 0.0014$/sec pour A100). Modèles populaires facturés par sortie (ex: 0.003-0.04$ par image).
+- Limites : Les modèles publics ne sont facturés que pendant le temps de traitement actif. Les modèles privés sont facturés pour toute la durée de vie de l'instance (incluant le temps d'attente).
+- Pièges : Le coût peut augmenter rapidement pour les modèles privés ou les charges de travail intermittentes en raison du temps d'attente facturé.
 - Validité : Non précisé
-- Lien : https://cloud.google.com/startup/program
+- Lien : https://replicate.com/
 
-### 🆕 Crédits Gratuits OpenAI API — OpenAI
-- Type : Crédits API
+### 🆕 Crédits de démarrage gratuits — OpenAI
+- Type : API LLM
 - Région : Monde
 - Score usage : 2/5
-- Gain : 5 $ de crédits gratuits pour les nouveaux comptes API, utilisables sur tous les modèles.
-- Limites : Les crédits expirent après 3 mois. Pas de carte de crédit requise pour l'inscription initiale.
-- Pièges : Les 5 $ sont très limités et s'épuisent rapidement (quelques heures de test). Pour des crédits plus importants (500 $ à 50 000 $+), il faut passer par des programmes spécifiques ou des partenaires.
+- Gain : 5$ de crédits gratuits pour les nouveaux utilisateurs.
+- Limites : Les crédits sont à usage unique et peuvent avoir une durée de vie limitée. Nécessite une carte bancaire pour dépasser le quota initial.
+- Pièges : Les crédits gratuits sont limités et ne suffisent que pour un prototypage très basique. OpenAI ne propose plus de crédits gratuits récurrents pour l'API.
 - Validité : Non précisé
-- Lien : https://openai.com/pricing
+- Lien : https://platform.openai.com/
 
-### 🆕 Programme Startup Runpod — RunPod
-- Type : Crédits GPU Cloud
+### 🆕 Free Tier Généreux pour Gemini API — Google AI Studio / Vertex AI
+- Type : API LLM
 - Région : Monde
 - Score usage : 4/5
-- Gain : Starter Tier : 1 000 $ de crédits. Growth Tier : 25 000 $ de crédits bonus pour un engagement de 50 000 $.
-- Limites : Starter Tier : pour les startups en phase initiale avec des charges de travail IA réelles. Growth Tier : pour les startups financées par capital-risque avec des charges de travail de production. Les crédits sont utilisables sur tous les produits Runpod.
-- Pièges : Le Growth Tier nécessite un engagement financier upfront. L'approbation est basée sur la phase et la maturité de la startup.
+- Gain : Accès gratuit et continu aux modèles Gemini Flash et Pro avec des limites de requêtes généreuses.
+- Limites : Limites de requêtes par minute et tokens par jour. Pas de carte bancaire requise pour AI Studio.
+- Pièges : Les données d'utilisation peuvent être utilisées pour l'entraînement des modèles dans le free tier.
 - Validité : Non précisé
-- Lien : https://www.runpod.io/startup-program
+- Lien : https://ai.google.dev/
 
-### 🆕 Free Tier API Mistral — Mistral AI
-- Type : API LLM / Free Tier
-- Région : Monde
-- Score usage : 3/5
-- Gain : Accès gratuit aux modèles Mistral Medium et Small via Le Chat (environ 25 messages/jour). Accès API expérimental avec limites de taux.
-- Limites : Le Chat : limité à environ 25 messages par jour. API : limites de taux d'environ 1 requête/seconde et 30 requêtes/minute. Pas de carte de crédit requise pour l'API expérimentale.
-- Pièges : Le Chat est limité pour un usage intensif. L'API expérimentale est conçue pour le test et le prototypage, pas pour la production. Pas d'accès à Mistral Large dans Le Chat gratuit.
-- Validité : Non précisé
-- Lien : https://mistral.ai/pricing/
-
-### 🆕 Free Tier API Google Gemini (AI Studio) — Google
-- Type : API LLM / Free Tier
+### 🆕 Paiement à l'usage pour l'inférence GPU — Vast.ai
+- Type : GPU Cloud
 - Région : Monde
 - Score usage : 4/5
-- Gain : Accès gratuit et continu aux modèles Gemini Flash et Pro via AI Studio. Limites de taux généreuses pour le prototypage.
-- Limites : Limites de taux plus basses que les plans payants. Pas de carte de crédit requise pour AI Studio.
-- Pièges : Pour la production, il faut passer à Vertex AI avec facturation activée. Les limites de taux peuvent être contraignantes pour des charges de travail importantes.
+- Gain : Tarifs très compétitifs pour la location de GPUs, souvent inférieurs à RunPod (ex: L40 40GB à 0.31$/hr).
+- Limites : Les prix fluctuent quotidiennement. L'environnement est moins stable que les fournisseurs cloud traditionnels.
+- Pièges : Moins de fiabilité et de support que les grands fournisseurs cloud. La disponibilité des GPUs peut varier.
 - Validité : Non précisé
-- Lien : https://ai.google.dev/models/gemini
+- Lien : https://vast.ai/
 
-### 🆕 Crédits Gratuits Groq API — Groq
-- Type : API LLM / Free Tier
+### 🆕 Free Tier pour API LLM et Multimodal — Cohere
+- Type : API LLM / Embeddings
 - Région : Monde
 - Score usage : 3/5
-- Gain : Accès gratuit à tous les modèles avec des limites de taux pour le prototypage.
-- Limites : 30 requêtes/minute, 6 000 tokens/minute, 14 400 requêtes/jour au niveau de l'organisation. Pas de carte de crédit requise.
-- Pièges : Les limites sont suffisantes pour le prototypage mais pas pour la production. Les limites s'appliquent au niveau de l'organisation.
+- Gain : Free tier pour les API de génération de texte, embeddings et reranking.
+- Limites : Limité à 100 RPM (requêtes par minute). Utilisable pour le prototypage et les applications à petite échelle.
+- Pièges : Les limites de RPM peuvent être restrictives pour des applications plus intensives.
+- Validité : Non précisé
+- Lien : https://cohere.com/
+
+### 🆕 API Gateway avec Free Tier — Cloudflare
+- Type : API Gateway / Router
+- Région : Monde
+- Score usage : 3/5
+- Gain : Fonctionnalités de base gratuites (analytics, caching, rate limiting). Les coûts proviennent de l'utilisation des Workers et des fournisseurs de modèles sous-jacents.
+- Limites : Le plan gratuit des Workers inclut 100 000 logs AI Gateway/mois. L'utilisation au-delà nécessite un plan payant.
+- Pièges : Les coûts réels dépendent de l'utilisation des Workers et des appels aux fournisseurs d'API IA sous-jacents. Pas de frais directs pour l'AI Gateway elle-même.
+- Validité : Non précisé
+- Lien : https://www.cloudflare.com/products/workers-ai/
+
+### 🆕 Crédits pour développeurs et startups — Together AI
+- Type : API Inference / GPU Cloud
+- Région : Monde
+- Score usage : 2/5
+- Gain : Programme Startup Accelerator offrant jusqu'à 50 000$ de crédits pour les startups qualifiées.
+- Limites : Programme basé sur une application, lié au stade de financement de la startup. Nécessite une société.
+- Pièges : Non adapté aux freelances ou solo builders sans société. Processus de candidature potentiellement long.
+- Validité : Non précisé
+- Lien : https://www.together.ai/startup-accelerator
+
+### 🆕 Free Tier pour API LLM — Mistral AI
+- Type : API LLM
+- Région : Monde
+- Score usage : 2/5
+- Gain : Accès à certains modèles via une API avec des limites de débit.
+- Limites : Les détails du free tier et ses limites ne sont pas toujours clairement communiqués et peuvent varier. Souvent via des programmes d'essai ou des allocations limitées.
+- Pièges : Le free tier est souvent limité dans le temps ou en volume, et peut nécessiter une inscription à des programmes spécifiques.
+- Validité : Non précisé
+- Lien : https://mistral.ai/
+
+### 🆕 Crédits de démarrage pour développeurs — Vercel
+- Type : Plateforme / AI Gateway
+- Région : Monde
+- Score usage : 2/5
+- Gain : Crédits gratuits pour l'utilisation de l'AI Gateway et des fonctions serverless.
+- Limites : Le plan Hobby est gratuit mais limité. Le plan Pro (20$/utilisateur/mois) inclut des crédits et des quotas plus élevés. Les crédits AI Gateway sont déduits d'un solde prépayé.
+- Pièges : Les coûts d'utilisation de l'AI Gateway et des fonctions serverless peuvent s'accumuler rapidement. Le plan gratuit est très limité pour l'IA.
+- Validité : Non précisé
+- Lien : https://vercel.com/pricing
+
+### 🆕 Paiement à l'usage pour l'inférence — Azure OpenAI Service
+- Type : API LLM
+- Région : Monde
+- Score usage : 3/5
+- Gain : Accès aux modèles OpenAI avec des options de tarification standard (pay-as-you-go) et provisionnée (PTU). Réduction de 50% avec l'API Batch.
+- Limites : Les prix varient selon le modèle et le type de déploiement (Standard, Provisioned, Batch).
+- Pièges : Pas de free tier significatif pour l'API. Les coûts peuvent être élevés pour les modèles les plus performants.
+- Validité : Non précisé
+- Lien : https://azure.microsoft.com/en-us/products/ai-services/openai-service/
+
+
+## Offres modifiées
+
+### ♻️ Free Tier pour API LLM et Speech-to-Text — Groq
+- Type : API Inference
+- Région : Monde
+- Score usage : 3/5
+- Gain : Accès gratuit à Whisper Large v3 pour la transcription audio (2000 requêtes/jour).
+- Limites : Limité à 2000 requêtes audio par jour. Les limites globales du free tier s'appliquent.
+- Pièges : Les limites quotidiennes peuvent être atteintes rapidement pour des volumes importants.
 - Validité : Non précisé
 - Lien : https://groq.com/
 
-### 🆕 Free Tier Hugging Face Hub — Hugging Face
-- Type : Plateforme IA / Free Tier
+### ♻️ Paiement à l'usage pour l'inférence GPU — RunPod
+- Type : GPU Cloud
 - Région : Monde
-- Score usage : 3/5
-- Gain : Accès à 2M+ modèles publics, 100 Go de stockage privé, Spaces communautaires, accès ZeroGPU (quota journalier), 0.10 $/mois de crédits Inference Provider.
-- Limites : Quota ZeroGPU limité (environ 5 min/jour pour les utilisateurs gratuits). Les crédits Inference Provider sont très faibles pour la production.
-- Pièges : Le quota GPU est très limité. Les crédits Inference Provider sont symboliques. Les limites de taux sur l'API d'inférence sont plus strictes sur le plan gratuit.
-- Validité : Non précisé
-- Lien : https://huggingface.co/pricing
-
-### 🆕 Crédits Gratuits Fireworks AI — Fireworks AI
-- Type : API LLM / Crédits
-- Région : Monde
-- Score usage : 3/5
-- Gain : Crédits gratuits initiaux pour les nouveaux comptes développeurs.
-- Limites : Non précisé.
-- Pièges : Le montant exact des crédits et leur durée de validité ne sont pas clairement spécifiés.
-- Validité : Non précisé
-- Lien : https://fireworks.ai/
-
-### 🆕 Programme Startup Runpod (Referral) — RunPod
-- Type : Crédits GPU Cloud
-- Région : Monde
-- Score usage : 2/5
-- Gain : Crédit aléatoire (entre 5 $ et 500 $) pour l'utilisateur référé et le référent après que les deux aient dépensé 10 $.
-- Limites : Nécessite une dépense initiale de 10 $ pour activer le bonus. Le bonus est aléatoire.
-- Pièges : Le montant du bonus est aléatoire et peut être faible. Le système de parrainage peut être complexe à optimiser.
+- Score usage : 4/5
+- Gain : Tarifs compétitifs pour la location de GPUs (ex: L40S à 0.86$/hr, A100 PCIe à 1.39$/hr). Paiement à la seconde.
+- Limites : Les prix varient selon la configuration (GPU, RAM, CPU) et l'environnement (Community vs Secure Cloud).
+- Pièges : Les coûts de stockage additionnels (disque conteneur, stockage réseau). La différence de prix entre Community et Secure Cloud peut être significative.
 - Validité : Non précisé
 - Lien : https://www.runpod.io/
 
-### 🆕 Crédits Cloud Microsoft pour Startups — Microsoft Azure
-- Type : Crédits Cloud / Startup
-- Région : Monde
-- Score usage : 4/5
-- Gain : Jusqu'à 150 000 $ de crédits Azure.
-- Limites : Les crédits peuvent être distribués par tranches. Nécessite une inscription via le programme Microsoft for Startups Founders Hub.
-- Pièges : L'approbation est à la discrétion de Microsoft. Les crédits peuvent être conditionnés à l'utilisation des crédits précédents.
-- Validité : Non précisé
-- Lien : https://azure.microsoft.com/en-us/solutions/startups/
 
-### 🆕 Programme OpenAI pour Startups — OpenAI
-- Type : Crédits API / Startup
-- Région : Monde
-- Score usage : 4/5
-- Gain : Jusqu'à 5 000 $ de crédits API OpenAI pour les startups financées par capital-risque.
-- Limites : Destiné aux startups financées par capital-risque. Les crédits sont pour l'API OpenAI.
-- Pièges : L'éligibilité est stricte (VC-backed). Le montant peut varier.
-- Validité : Non précisé
-- Lien : https://openai.com/startups
+## Offres disparues du top
 
-### 🆕 Programme AI Startup Bright Data — Bright Data
-- Type : Crédits / Support
-- Région : Monde
-- Score usage : 3/5
-- Gain : Jusqu'à 20 000 $ de crédits et support expert.
-- Limites : Destiné aux startups IA qui dépendent de données web. L'éligibilité est basée sur le type de projet IA.
-- Pièges : Le montant exact des crédits et les conditions spécifiques ne sont pas toujours clairs sans contact direct.
-- Validité : Non précisé
-- Lien : https://brightdata.com/ai-startup-program
-
-### 🆕 Free Tier Ollama — Ollama
-- Type : Logiciel Local / Free Tier
-- Région : Monde
-- Score usage : 5/5
-- Gain : Exécution locale de modèles open-source sans coût d'API ni de service.
-- Limites : Nécessite un matériel local suffisant pour exécuter les modèles. Pas de limites de taux ou de quotas imposés par un fournisseur.
-- Pièges : La performance dépend entièrement du matériel de l'utilisateur. Pas de support cloud ou d'API managée.
-- Validité : Non précisé
-- Lien : https://ollama.com/
-
-### 🆕 Crédits Gratuits pour Startups (Divers) — Divers (AWS, GCP, Azure, NVIDIA)
-- Type : Crédits Cloud / Startup
-- Région : Monde
-- Score usage : 4/5
-- Gain : Potentiellement des dizaines de milliers de dollars en crédits cloud et GPU.
-- Limites : Souvent conditionné à l'appartenance à des programmes d'accélérateurs/incubateurs/VC (ex: NVIDIA Inception pour crédits AWS). Les montants varient considérablement.
-- Pièges : L'accès aux montants les plus élevés (>100k $) est généralement réservé aux startups ayant déjà du financement VC. Les conditions d'éligibilité peuvent être complexes.
-- Validité : Non précisé
-- Lien : non précisé
-
-### 🆕 Programme Codex for Open Source (OpenAI) — OpenAI
-- Type : Accès Gratuit / Outil IA
-- Région : Monde
-- Score usage : 3/5
-- Gain : 6 mois d'accès à ChatGPT Pro, y compris Codex (agent de codage IA), d'une valeur d'environ 1 200 $.
-- Limites : Destiné aux développeurs open-source construisant sur GitHub public. Nécessite une candidature.
-- Pièges : Programme sélectif, pas garanti. L'accès est limité dans le temps (6 mois).
-- Validité : Non précisé
-- Lien : non précisé
-
-### 🆕 Free Tier API Google Gemini (Vertex AI) — Google Cloud
-- Type : API LLM / Free Tier
-- Région : Monde
-- Score usage : 3/5
-- Gain : Crédits d'essai gratuits via le programme général de niveau gratuit de Google Cloud.
-- Limites : Fait partie du programme de niveau gratuit global de Google Cloud, avec ses propres limites.
-- Pièges : Les limites peuvent être moins généreuses que celles d'AI Studio pour un usage continu.
-- Validité : Non précisé
-- Lien : https://cloud.google.com/vertex-ai
-
+- Crédits AWS Activate pour Startups — AWS
+- Programme Cloud Google pour Startups (Crédits IA) — Google Cloud
+- Crédits Gratuits OpenAI API — OpenAI
+- Programme Startup Runpod — RunPod
+- Free Tier API Mistral — Mistral AI
+- Free Tier API Google Gemini (AI Studio) — Google
+- Free Tier Hugging Face Hub — Hugging Face
+- Crédits Gratuits Fireworks AI — Fireworks AI
+- Crédits Cloud Microsoft pour Startups — Microsoft Azure
+- Programme OpenAI pour Startups — OpenAI
+- Programme AI Startup Bright Data — Bright Data
+- Free Tier Ollama — Ollama
+- Crédits Gratuits pour Startups (Divers) — Divers (AWS, GCP, Azure, NVIDIA)
+- Programme Codex for Open Source (OpenAI) — OpenAI
+- Free Tier API Google Gemini (Vertex AI) — Google Cloud
