@@ -1,0 +1,52 @@
+name: Discord Notify Test From Existing Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Mode de test Discord sans appel Gemini"
+        required: true
+        default: "all_current_as_new"
+        type: choice
+        options:
+          - "all_current_as_new"
+          - "no_change"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: discord-notify-test
+  cancel-in-progress: true
+
+jobs:
+  notify-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Validate code without API credits
+        run: |
+          python -m py_compile scripts/run_watch.py
+          python -m unittest discover -s tests
+
+      - name: Send Discord notification from existing data/latest.json
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_MAX_MESSAGES: "8"
+          DISCORD_ATTACH_FULL_REPORT: "true"
+          NOTIFY_ONLY: "true"
+          NOTIFY_ONLY_MODE: ${{ inputs.mode }}
+        run: python scripts/run_watch.py

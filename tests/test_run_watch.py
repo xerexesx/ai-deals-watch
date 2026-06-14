@@ -105,3 +105,47 @@ class RunWatchTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class DiscordV4Tests(unittest.TestCase):
+    def _payload_many(self, n=17):
+        return run_watch.normalize_payload({
+            "generated_title": "test",
+            "generated_summary": "test",
+            "offers": [
+                {
+                    "rank": i,
+                    "offer": f"Offer {i}",
+                    "provider": f"Provider {i}",
+                    "type": "API LLM",
+                    "region": "Monde",
+                    "gain": "Free tier utile pour freelance solo",
+                    "conditions_limits": "limites officielles à vérifier",
+                    "problems_traps": "quota faible possible",
+                    "usage_score": 5 if i <= 5 else 3,
+                    "validity": "non précisé",
+                    "official_link": f"https://example.com/{i}",
+                    "community_source": "non précisé",
+                }
+                for i in range(1, n + 1)
+            ],
+            "best_real_use": ["a", "b", "c", "d", "e"],
+            "riskiest_or_unstable": ["risk"],
+            "watchlist": ["watch 1", "watch 2", "watch 3"],
+            "critical_sources_used": ["source"],
+        })
+
+    def test_discord_v4_mentions_every_new_offer_name(self):
+        payload = self._payload_many(17)
+        diff = run_watch.DiffResult(True, payload["offers"], [], [])
+        messages = run_watch.build_discord_messages(diff, payload)
+        joined = "\n".join(messages)
+        for i in range(1, 18):
+            self.assertIn(f"Offer {i}", joined)
+        self.assertTrue(all(len(message) <= run_watch.DISCORD_CONTENT_LIMIT for message in messages))
+
+    def test_discord_report_filename_contains_counts(self):
+        payload = self._payload_many(2)
+        diff = run_watch.DiffResult(True, payload["offers"], [], [])
+        filename = run_watch.discord_report_filename(diff, payload)
+        self.assertIn("new2-mod0-out0", filename)
+        self.assertTrue(filename.endswith(".md"))

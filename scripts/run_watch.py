@@ -40,7 +40,9 @@ MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
 MAX_OFFERS = int(os.getenv("AI_DEALS_MAX_OFFERS", "30"))
 GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "32768"))
 DISCORD_CONTENT_LIMIT = 1900  # Discord content max is 2000; keep margin.
-DISCORD_MAX_MESSAGES = int(os.getenv("DISCORD_MAX_MESSAGES", "6"))
+DISCORD_SUMMARY_LIMIT = 1850
+DISCORD_ATTACH_FULL_REPORT = os.getenv("DISCORD_ATTACH_FULL_REPORT", "true").lower() == "true"
+DISCORD_MAX_MESSAGES = int(os.getenv("DISCORD_MAX_MESSAGES", "8"))
 
 ALLOWED_REGIONS = {"Monde", "Europe", "US-only", "Région limitée", "Non précisé"}
 
@@ -484,40 +486,120 @@ def split_text(text: str, limit: int = DISCORD_CONTENT_LIMIT) -> list[str]:
     return chunks
 
 
-def build_discord_messages(diff: DiffResult, payload: dict[str, Any]) -> list[str]:
-    title = "🚨 Veille bons plans IA"
-    if not diff.changed:
-        return [f"{title}\nAucun changement détecté. Rapport régénéré : `reports/latest.md`"]
+def discord_safe_line(text: str, max_chars: int = 160) -> str:
+    """Keep Discord notifications readable and compact."""
+    text = re.sub(r"\s+", " ", str(text or "")).strip()
+    text = text.replace("[`", "(").replace("`]", ")")
+    if len(text) <= max_chars:
+        return text
+    return text[: max_chars - 1].rstrip() + "…"
 
-    header = (
-        f"{title}\n"
-        f"🆕 {len(diff.new_offers)} nouvelles | ♻️ {len(diff.modified_offers)} modifiées | "
-        f"🗑️ {len(diff.removed_offers)} sorties du top\n"
-        f"Rapport complet : `reports/latest.md`"
+
+def compact_offer_line(prefix: str, offer: dict[str, Any], include_link: bool = False) -> str:
+    score = offer.get("usage_score", "?")
+    rank = offer.get("rank", "?")
+    gain = discord_safe_line(offer.get("gain", "non précisé"), 95)
+    trap = discord_safe_line(offer.get("problems_traps", "non précisé"), 80)
+    line = (
+        f"{prefix} **#{rank} {discord_safe_line(offer.get('offer'), 70)}** — "
+        f"{discord_safe_line(offer.get('provider'), 35)} | {score}/5\n"
+        f"↳ {gain}"
     )
+    if trap and trap != "non précisé":
+        line += f" | ⚠️ {trap}"
+    if include_link and valid_url(str(offer.get("official_link", ""))):
+        line += f"\n{offer['official_link']}"
+    return line
 
-    parts = [header]
-    selected = [("🆕", x) for x in diff.new_offers] + [("♻️", x) for x in diff.modified_offers]
 
-    for prefix, offer in selected[:10]:
-        item = (
-            f"{prefix} **{offer['offer']}** — {offer['provider']}\n"
-            f"Type: {offer['type']} | Région: {offer['region']} | Score usage: {offer['usage_score']}/5\n"
-            f"Gain: {offer['gain']}\n"
-            f"Limites: {offer['conditions_limits']}\n"
-            f"Pièges: {offer['problems_traps']}\n"
-            f"Lien: {offer['official_link']}"
+def pick_top_offers(payload: dict[str, Any], limit: int = 5) -> list[dict[str, Any]]:
+    offers = list(payload.get("offers", []))
+    offers.sort(key=lambda o: (-safe_int(o.get("usage_score"), 0, 0, 5), safe_int(o.get("rank"), 999, 1, 999)))
+    return offers[:limit]
+
+
+def build_discord_overview(diff: DiffResult, payload: dict[str, Any]) -> str:
+    lines = [
+        "🚨 **Veille bons plans IA**",
+        f"🆕 **{len(diff.new_offers)}** nouvelles | ♻️ **{len(diff.modified_offers)}** modifiées | 🗑️ **{len(diff.removed_offers)}** sorties",
+        f"📦 Offres retenues dans le rapport : **{len(payload.get('offers', []))}**",
+        "📎 Rapport complet en pièce jointe `.md`",
+        "",
+    ]
+
+    if diff.changed:
+        lines.append("🏆 **Top usage réel**")
+        for offer in pick_top_offers(payload, 5):
+            lines.append(compact_offer_line("•", offer, include_link=False))
+    else:
+        lines.append("Aucun changement détecté. Rapport complet régénéré en pièce jointe.")
+
+    if payload.get("watchlist"):
+        lines += ["", "👀 **À surveiller**"]
+        for item in payload["watchlist"][:3]:
+            lines.append(f"• {discord_safe_line(item, 180)}")
+
+    text = "\n".join(lines)
+    return text[:DISCORD_SUMMARY_LIMIT]
+
+
+def build_discord_changes_list(diff: DiffResult) -> list[str]:
+    """Build compact change messages. Every changed/new offer should appear at least by name."""
+    if not diff.changed:
+        return []
+
+    sections: list[str] = []
+
+    if diff.new_offers:
+        lines = ["🆕 **Nouveautés détectées**"]
+        for offer in sorted(diff.new_offers, key=lambda o: safe_int(o.get("rank"), 999, 1, 999)):
+            lines.append(compact_offer_line("•", offer, include_link=False))
+        sections.extend(split_text("\n".join(lines), limit=DISCORD_CONTENT_LIMIT))
+
+    if diff.modified_offers:
+        lines = ["♻️ **Offres modifiées**"]
+        for offer in sorted(diff.modified_offers, key=lambda o: safe_int(o.get("rank"), 999, 1, 999)):
+            lines.append(compact_offer_line("•", offer, include_link=False))
+        sections.extend(split_text("\n".join(lines), limit=DISCORD_CONTENT_LIMIT))
+
+    if diff.removed_offers:
+        lines = ["🗑️ **Sorties du top**"]
+        for offer in diff.removed_offers:
+            lines.append(f"• {discord_safe_line(offer.get('offer'), 80)} — {discord_safe_line(offer.get('provider'), 40)}")
+        sections.extend(split_text("\n".join(lines), limit=DISCORD_CONTENT_LIMIT))
+
+    return sections
+
+
+def build_discord_messages(diff: DiffResult, payload: dict[str, Any]) -> list[str]:
+    messages = [build_discord_overview(diff, payload)]
+    messages.extend(build_discord_changes_list(diff))
+    footer = "✅ Détails complets, liens et pièges : voir le fichier Markdown joint."
+    if messages and len(messages[-1]) + len(footer) + 2 <= DISCORD_CONTENT_LIMIT:
+        messages[-1] += "\n\n" + footer
+    else:
+        messages.append(footer)
+    return messages[:DISCORD_MAX_MESSAGES]
+
+
+def discord_report_filename(diff: DiffResult, payload: dict[str, Any]) -> str:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M")
+    if diff.changed:
+        return (
+            f"veille-bons-plans-ia-{stamp}-"
+            f"new{len(diff.new_offers)}-mod{len(diff.modified_offers)}-out{len(diff.removed_offers)}.md"
         )
-        parts.extend(split_text(item))
+    return f"veille-bons-plans-ia-{stamp}-no-change.md"
 
-    if len(selected) > 10 or diff.removed_offers:
-        parts.append("Suite complète dans `reports/changes.md` et l’issue GitHub générée automatiquement.")
 
-    safe_messages: list[str] = []
-    for part in parts:
-        safe_messages.extend(split_text(part))
-
-    return safe_messages[:DISCORD_MAX_MESSAGES]
+def discord_retry_after(response: Any, default: float = 2.0) -> float:
+    try:
+        return float(response.json().get("retry_after", default))
+    except Exception:
+        try:
+            return float(response.headers.get("Retry-After", default))
+        except Exception:
+            return default
 
 
 def send_discord_message(webhook_url: str, content: str) -> None:
@@ -531,12 +613,7 @@ def send_discord_message(webhook_url: str, content: str) -> None:
             return
 
         if response.status_code == 429:
-            retry_after = 2.0
-            try:
-                retry_after = float(response.json().get("retry_after", retry_after))
-            except Exception:
-                retry_after = float(response.headers.get("Retry-After", retry_after))
-            time.sleep(retry_after + 0.5)
+            time.sleep(discord_retry_after(response) + 0.5)
             continue
 
         if response.status_code in {401, 403, 404}:
@@ -544,6 +621,36 @@ def send_discord_message(webhook_url: str, content: str) -> None:
 
         if attempt == 3:
             raise RuntimeError(f"Discord webhook error HTTP {response.status_code}: {response.text[:500]}")
+
+        time.sleep(2 * attempt)
+
+
+def send_discord_file(webhook_url: str, content: str, filename: str, message: str = "") -> None:
+    """Send a Markdown report as a Discord webhook attachment using multipart/form-data."""
+    import requests
+
+    safe_message = message[:DISCORD_CONTENT_LIMIT]
+    payload_json = json.dumps({"content": safe_message}, ensure_ascii=False)
+    files = {
+        "files[0]": (filename, content.encode("utf-8"), "text/markdown; charset=utf-8"),
+    }
+    data = {"payload_json": payload_json}
+
+    for attempt in range(1, 4):
+        response = requests.post(webhook_url, data=data, files=files, timeout=30)
+
+        if response.status_code in {200, 204}:
+            return
+
+        if response.status_code == 429:
+            time.sleep(discord_retry_after(response) + 0.5)
+            continue
+
+        if response.status_code in {401, 403, 404}:
+            raise RuntimeError(f"Discord webhook invalide ou inaccessible: HTTP {response.status_code}")
+
+        if attempt == 3:
+            raise RuntimeError(f"Discord file upload error HTTP {response.status_code}: {response.text[:500]}")
 
         time.sleep(2 * attempt)
 
@@ -568,6 +675,16 @@ def notify_discord(diff: DiffResult, payload: dict[str, Any]) -> None:
         send_discord_message(webhook, message)
         print(f"Discord message envoyé {index}/{len(messages)}")
         time.sleep(1.1)
+
+    if DISCORD_ATTACH_FULL_REPORT and LATEST_MD.exists():
+        filename = discord_report_filename(diff, payload)
+        send_discord_file(
+            webhook,
+            LATEST_MD.read_text(encoding="utf-8"),
+            filename,
+            message=f"📎 Rapport complet Markdown : `{filename}`",
+        )
+        print(f"Discord fichier envoyé: {filename}")
 
 
 def build_runtime_prompt() -> str:
@@ -727,7 +844,40 @@ def write_github_output(diff: DiffResult) -> None:
         f.write(f"removed_count={len(diff.removed_offers)}\n")
 
 
+def load_current_payload_from_files() -> dict[str, Any]:
+    if not LATEST_JSON.exists():
+        raise RuntimeError("data/latest.json introuvable. Lance d’abord un vrai run ou récupère les artefacts du repo.")
+    payload = json.loads(LATEST_JSON.read_text(encoding="utf-8"))
+    if "offers" not in payload:
+        raise RuntimeError("data/latest.json existe mais ne contient pas de champ offers.")
+    return payload
+
+
+def notify_from_existing_files(mode: str = "all_current_as_new") -> int:
+    """Discord-only test path. No Gemini call, no write, no commit, no issue."""
+    payload = load_current_payload_from_files()
+
+    if mode == "no_change":
+        diff = DiffResult(False, [], [], [])
+    elif mode == "real_diff_from_latest":
+        previous = load_previous()
+        diff = diff_payload(previous, payload)
+    else:
+        diff = DiffResult(True, list(payload.get("offers", [])), [], [])
+
+    notify_discord(diff, payload)
+    print("Discord notify-only terminé.")
+    print(f"mode={mode}")
+    print(f"offers={len(payload.get('offers', []))}")
+    print(f"new={len(diff.new_offers)} modified={len(diff.modified_offers)} removed={len(diff.removed_offers)}")
+    return 0
+
+
 def main() -> int:
+    if os.getenv("NOTIFY_ONLY", "false").lower() == "true":
+        mode = os.getenv("NOTIFY_ONLY_MODE", "all_current_as_new")
+        return notify_from_existing_files(mode=mode)
+
     dry_run = os.getenv("DRY_RUN", "false").lower() == "true"
 
     if dry_run:
