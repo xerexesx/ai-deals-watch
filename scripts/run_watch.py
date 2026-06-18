@@ -36,7 +36,7 @@ LATEST_MD = REPORTS_DIR / "latest.md"
 CHANGES_MD = REPORTS_DIR / "changes.md"
 FAILED_RAW_TXT = REPORTS_DIR / "failed_raw_response.txt"
 
-MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
 MAX_OFFERS = int(os.getenv("AI_DEALS_MAX_OFFERS", "30"))
 GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "32768"))
 DISCORD_CONTENT_LIMIT = 1900  # Discord content max is 2000; keep margin.
