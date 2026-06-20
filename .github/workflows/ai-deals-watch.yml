@@ -12,11 +12,11 @@ on:
           - "false"
           - "true"
   schedule:
-    # Mardi 07:17 Europe/Paris
-    - cron: "17 7 * * 2"
+    # Mardi 03:23 Europe/Paris
+    - cron: "23 3 * * 2"
       timezone: "Europe/Paris"
-    # Vendredi 07:37 Europe/Paris
-    - cron: "37 7 * * 5"
+    # Vendredi 03:37 Europe/Paris
+    - cron: "37 3 * * 5"
       timezone: "Europe/Paris"
 
 permissions:
