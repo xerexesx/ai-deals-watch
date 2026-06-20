@@ -1,6 +1,7 @@
 import importlib.util
 import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -102,6 +103,62 @@ class RunWatchTests(unittest.TestCase):
         self.assertIn("offers", payload)
         self.assertEqual(len(payload["offers"]), 1)
 
+    def test_main_reuses_latest_payload_on_gemini_quota_error(self):
+        payload = run_watch.sample_payload()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            original_paths = {
+                "DATA_DIR": run_watch.DATA_DIR,
+                "HISTORY_DIR": run_watch.HISTORY_DIR,
+                "REPORTS_DIR": run_watch.REPORTS_DIR,
+                "LATEST_JSON": run_watch.LATEST_JSON,
+                "LATEST_MD": run_watch.LATEST_MD,
+                "CHANGES_MD": run_watch.CHANGES_MD,
+            }
+            original_call_gemini = run_watch.call_gemini
+            original_notify_discord = run_watch.notify_discord
+            original_env = dict(os.environ)
+
+            try:
+                run_watch.DATA_DIR = tmp_path / "data"
+                run_watch.HISTORY_DIR = run_watch.DATA_DIR / "history"
+                run_watch.REPORTS_DIR = tmp_path / "reports"
+                run_watch.LATEST_JSON = run_watch.DATA_DIR / "latest.json"
+                run_watch.LATEST_MD = run_watch.REPORTS_DIR / "latest.md"
+                run_watch.CHANGES_MD = run_watch.REPORTS_DIR / "changes.md"
+
+                run_watch.DATA_DIR.mkdir()
+                run_watch.REPORTS_DIR.mkdir()
+                run_watch.LATEST_JSON.write_text(run_watch.json.dumps(payload), encoding="utf-8")
+
+                output_path = tmp_path / "github_output.txt"
+                os.environ.clear()
+                os.environ.update({"GITHUB_OUTPUT": str(output_path)})
+
+                run_watch.call_gemini = lambda prompt: (_ for _ in ()).throw(
+                    RuntimeError("429 RESOURCE_EXHAUSTED quota exceeded")
+                )
+                notifications = []
+                run_watch.notify_discord = lambda diff, current: notifications.append((diff, current))
+
+                self.assertEqual(run_watch.main(), 0)
+
+                changes = run_watch.CHANGES_MD.read_text(encoding="utf-8")
+                self.assertIn("quota Gemini saturé", changes)
+                self.assertIn("dernière veille conservée", changes)
+                self.assertIn("changed=false", output_path.read_text(encoding="utf-8"))
+                self.assertEqual(len(notifications), 1)
+                self.assertFalse(notifications[0][0].changed)
+                self.assertEqual(run_watch.json.loads(run_watch.LATEST_JSON.read_text(encoding="utf-8"))["offers"], payload["offers"])
+            finally:
+                for name, value in original_paths.items():
+                    setattr(run_watch, name, value)
+                run_watch.call_gemini = original_call_gemini
+                run_watch.notify_discord = original_notify_discord
+                os.environ.clear()
+                os.environ.update(original_env)
+
 
 if __name__ == "__main__":
     unittest.main()
@@ -135,11 +192,11 @@ class DiscordV4Tests(unittest.TestCase):
         })
 
     def test_discord_v4_mentions_every_new_offer_name(self):
-        payload = self._payload_many(17)
+        payload = self._payload_many(run_watch.MAX_OFFERS)
         diff = run_watch.DiffResult(True, payload["offers"], [], [])
         messages = run_watch.build_discord_messages(diff, payload)
         joined = "\n".join(messages)
-        for i in range(1, 18):
+        for i in range(1, run_watch.MAX_OFFERS + 1):
             self.assertIn(f"Offer {i}", joined)
         self.assertTrue(all(len(message) <= run_watch.DISCORD_CONTENT_LIMIT for message in messages))
 

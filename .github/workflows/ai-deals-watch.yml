@@ -58,8 +58,10 @@ jobs:
           DISCORD_NOTIFY_NO_CHANGE: "false"
           DISCORD_MAX_MESSAGES: "8"
           DISCORD_ATTACH_FULL_REPORT: "true"
-          AI_DEALS_MAX_OFFERS: "30"
-          GEMINI_MAX_OUTPUT_TOKENS: "32768"
+          GEMINI_MODEL: "gemini-2.5-flash-lite"
+          AI_DEALS_MAX_OFFERS: "12"
+          GEMINI_MAX_OUTPUT_TOKENS: "8192"
+          GEMINI_USE_GROUNDING: "true"
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == 'true' && 'true' || 'false' }}
         run: python scripts/run_watch.py
 

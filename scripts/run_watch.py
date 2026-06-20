@@ -37,8 +37,9 @@ CHANGES_MD = REPORTS_DIR / "changes.md"
 FAILED_RAW_TXT = REPORTS_DIR / "failed_raw_response.txt"
 
 MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
-MAX_OFFERS = int(os.getenv("AI_DEALS_MAX_OFFERS", "30"))
-GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "32768"))
+MAX_OFFERS = int(os.getenv("AI_DEALS_MAX_OFFERS", "12"))
+GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "8192"))
+GEMINI_USE_GROUNDING = os.getenv("GEMINI_USE_GROUNDING", "true").lower() == "true"
 DISCORD_CONTENT_LIMIT = 1900  # Discord content max is 2000; keep margin.
 DISCORD_SUMMARY_LIMIT = 1850
 DISCORD_ATTACH_FULL_REPORT = os.getenv("DISCORD_ATTACH_FULL_REPORT", "true").lower() == "true"
@@ -446,6 +447,39 @@ def build_changes_markdown(diff: DiffResult, payload: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def is_gemini_quota_error(error: Exception) -> bool:
+    text = f"{type(error).__name__}: {error}".lower()
+    markers = (
+        "429",
+        "quota",
+        "rate limit",
+        "ratelimit",
+        "resource_exhausted",
+        "resource exhausted",
+        "too many requests",
+    )
+    return any(marker in text for marker in markers)
+
+
+def build_quota_fallback_changes_markdown(payload: dict[str, Any], error: Exception) -> str:
+    lines = [
+        "# Changements veille bons plans IA",
+        "",
+        f"- Généré le : `{utc_now()}`",
+        "- Nouvelles offres : `0`",
+        "- Offres modifiées : `0`",
+        "- Offres disparues : `0`",
+        "",
+        "Aucun changement détecté.",
+        "",
+        "⚠️ quota Gemini saturé, dernière veille conservée.",
+        f"- Dernière veille : `{payload.get('generated_at', 'non précisé')}`",
+        f"- Modèle précédent : `{payload.get('model', 'non précisé')}`",
+        f"- Erreur : `{clean_text(error, max_chars=240)}`",
+    ]
+    return "\n".join(lines) + "\n"
+
+
 def split_long_line(line: str, limit: int) -> list[str]:
     if len(line) <= limit:
         return [line]
@@ -801,8 +835,9 @@ def call_gemini(prompt: str) -> str:
     last_error: Exception | None = None
     for attempt in range(1, 4):
         try:
+            tools = [types.Tool(google_search=types.GoogleSearch())] if GEMINI_USE_GROUNDING else None
             config = types.GenerateContentConfig(
-                tools=[types.Tool(google_search=types.GoogleSearch())],
+                tools=tools,
                 temperature=0.1,
                 max_output_tokens=GEMINI_MAX_OUTPUT_TOKENS,
             )
@@ -922,25 +957,39 @@ def main() -> int:
     if dry_run:
         print("DRY_RUN=true: aucun appel Gemini ne sera effectué.")
         payload = sample_payload()
+        previous = load_previous()
+        diff = diff_payload(previous, payload)
+        latest_md = build_latest_markdown(payload)
+        changes_md = build_changes_markdown(diff, payload)
     else:
         prompt = build_runtime_prompt()
-        raw_text = call_gemini(prompt)
         try:
+            raw_text = call_gemini(prompt)
             raw_payload = extract_json(raw_text)
         except Exception as exc:
-            save_failed_raw_response(raw_text, exc)
-            raise RuntimeError(
-                "Impossible de parser le JSON Gemini. Le brut est sauvegardé dans "
-                "reports/failed_raw_response.txt. "
-                "Cause probable : sortie tronquée ou JSON non respecté par le modèle."
-            ) from exc
-        payload = normalize_payload(raw_payload)
+            if is_gemini_quota_error(exc):
+                print(f"WARN: Gemini quota/rate-limit detected, keeping latest payload: {exc}", file=sys.stderr)
+                payload = load_current_payload_from_files()
+                diff = DiffResult(False, [], [], [])
+                latest_md = build_latest_markdown(payload)
+                changes_md = build_quota_fallback_changes_markdown(payload, exc)
+            else:
+                raw_text = locals().get("raw_text", "")
+                if raw_text:
+                    save_failed_raw_response(raw_text, exc)
+                    raise RuntimeError(
+                        "Impossible de parser le JSON Gemini. Le brut est sauvegardé dans "
+                        "reports/failed_raw_response.txt. "
+                        "Cause probable : sortie tronquée ou JSON non respecté par le modèle."
+                    ) from exc
+                raise
+        else:
+            payload = normalize_payload(raw_payload)
+            previous = load_previous()
+            diff = diff_payload(previous, payload)
+            latest_md = build_latest_markdown(payload)
+            changes_md = build_changes_markdown(diff, payload)
 
-    previous = load_previous()
-    diff = diff_payload(previous, payload)
-
-    latest_md = build_latest_markdown(payload)
-    changes_md = build_changes_markdown(diff, payload)
     save_outputs(payload, latest_md, changes_md)
 
     try:

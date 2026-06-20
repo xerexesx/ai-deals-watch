@@ -9,10 +9,17 @@ Contexte utilisateur :
 - Inclure les offres US-only si elles sont vraiment exceptionnelles.
 
 Objectif :
-Trouver les meilleurs bons plans actuels dans l’univers IA, en priorisant ce qui est réellement exploitable pour du prototypage sérieux ou de la préproduction.
+Produire une veille compacte des 12 meilleures offres IA réellement utiles pour du prototypage sérieux ou de la préproduction.
+
+Priorité :
+1. Offres nouvelles ou modifiées depuis le dernier run.
+2. Sources officielles uniquement pour les montants, quotas, durées et conditions.
+3. Si une offre connue n’a pas changé, la résumer en une ligne maximum.
+4. Ne pas chercher à remplir artificiellement le classement.
+5. Si moins de 12 offres fiables existent, retourne moins de 12 offres.
 
 Consignes de recherche :
-- Cherche large, puis filtre fort.
+- Cherche uniquement les candidats les plus prometteurs, puis filtre fort.
 - Priorise les offres encore actives ou très probablement actives.
 - Priorise les offres avec vraie valeur d’usage pour un freelance, développeur solo ou petit collectif : crédits d’inscription sans VC, crédits mensuels, free tier généreux, accès gratuit réel, API réellement activable, pas seulement programmes startup.
 - Inclue : API LLM, model routers, inference providers, cloud/GPU, agent platforms, image/video/audio/speech APIs, student credits, developer credits, solo-founder/freelancer-friendly credits. Les startup credits sont acceptés seulement s’ils sont très intéressants ou activables sans friction excessive.
