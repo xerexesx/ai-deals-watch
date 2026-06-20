@@ -40,6 +40,7 @@ MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
 MAX_OFFERS = int(os.getenv("AI_DEALS_MAX_OFFERS", "12"))
 GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "8192"))
 GEMINI_USE_GROUNDING = os.getenv("GEMINI_USE_GROUNDING", "true").lower() == "true"
+GEMINI_MAX_RETRIES = int(os.getenv("GEMINI_MAX_RETRIES", "1"))
 DISCORD_CONTENT_LIMIT = 1900  # Discord content max is 2000; keep margin.
 DISCORD_SUMMARY_LIMIT = 1850
 DISCORD_ATTACH_FULL_REPORT = os.getenv("DISCORD_ATTACH_FULL_REPORT", "true").lower() == "true"
@@ -54,6 +55,12 @@ class DiffResult:
     new_offers: list[dict[str, Any]]
     modified_offers: list[dict[str, Any]]
     removed_offers: list[dict[str, Any]]
+
+
+class GeminiEmptyResponseError(RuntimeError):
+    def __init__(self, message: str, diagnostic: str) -> None:
+        super().__init__(message)
+        self.diagnostic = diagnostic
 
 
 # Keep the schema intentionally simple. Nested objects/arrays only, no oneOf/anyOf.
@@ -461,6 +468,18 @@ def is_gemini_quota_error(error: Exception) -> bool:
     return any(marker in text for marker in markers)
 
 
+def is_gemini_empty_response_error(error: Exception) -> bool:
+    text = f"{type(error).__name__}: {error}".lower()
+    markers = (
+        "réponse gemini vide",
+        "reponse gemini vide",
+        "empty response",
+        "finishreason.stop",
+        "finish_reason=stop",
+    )
+    return any(marker in text for marker in markers)
+
+
 def build_gemini_fallback_changes_markdown(payload: dict[str, Any], error: Exception, reason: str) -> str:
     lines = [
         "# Changements veille bons plans IA",
@@ -821,6 +840,44 @@ def extract_text_from_response(response: Any) -> str:
     return "\n".join(parts).strip()
 
 
+def response_debug_text(response: Any, finish_reason: str) -> str:
+    lines = [
+        f"finish_reason={finish_reason}",
+        f"response_type={type(response).__name__}",
+        f"text_present={bool(getattr(response, 'text', None))}",
+    ]
+
+    usage_metadata = getattr(response, "usage_metadata", None)
+    if usage_metadata is not None:
+        lines.append(f"usage_metadata={usage_metadata!r}")
+
+    prompt_feedback = getattr(response, "prompt_feedback", None)
+    if prompt_feedback is not None:
+        lines.append(f"prompt_feedback={prompt_feedback!r}")
+
+    try:
+        candidates = getattr(response, "candidates", []) or []
+        lines.append(f"candidates={len(candidates)}")
+        for candidate_index, candidate in enumerate(candidates, start=1):
+            lines.append(f"candidate_{candidate_index}_finish_reason={getattr(candidate, 'finish_reason', None)!r}")
+            content = getattr(candidate, "content", None)
+            parts = getattr(content, "parts", []) or []
+            lines.append(f"candidate_{candidate_index}_parts={len(parts)}")
+            for part_index, part in enumerate(parts, start=1):
+                part_text = getattr(part, "text", None)
+                lines.append(
+                    f"candidate_{candidate_index}_part_{part_index}_text_len="
+                    f"{len(str(part_text)) if part_text else 0}"
+                )
+            grounding_metadata = getattr(candidate, "grounding_metadata", None)
+            if grounding_metadata is not None:
+                lines.append(f"candidate_{candidate_index}_grounding_metadata={grounding_metadata!r}")
+    except Exception as exc:
+        lines.append(f"debug_error={type(exc).__name__}: {exc}")
+
+    return "\n".join(lines)
+
+
 def call_gemini(prompt: str) -> str:
     """Call Gemini with Google Search grounding.
 
@@ -837,7 +894,8 @@ def call_gemini(prompt: str) -> str:
     client = genai.Client(api_key=api_key)
 
     last_error: Exception | None = None
-    for attempt in range(1, 4):
+    attempts = max(1, GEMINI_MAX_RETRIES)
+    for attempt in range(1, attempts + 1):
         try:
             tools = [types.Tool(google_search=types.GoogleSearch())] if GEMINI_USE_GROUNDING else None
             config = types.GenerateContentConfig(
@@ -853,7 +911,10 @@ def call_gemini(prompt: str) -> str:
             finish_reason = get_finish_reason(response)
             text = extract_text_from_response(response)
             if not text:
-                raise RuntimeError(f"Réponse Gemini vide. finish_reason={finish_reason}")
+                raise GeminiEmptyResponseError(
+                    f"Réponse Gemini vide. finish_reason={finish_reason}",
+                    response_debug_text(response, finish_reason),
+                )
             if "MAX_TOKENS" in finish_reason.upper():
                 raise RuntimeError(
                     "Réponse Gemini tronquée par limite max_output_tokens. "
@@ -863,9 +924,11 @@ def call_gemini(prompt: str) -> str:
         except Exception as exc:
             last_error = exc
 
-        if attempt < 3:
+        if attempt < attempts:
             time.sleep(5 * attempt)
 
+    if isinstance(last_error, GeminiEmptyResponseError):
+        raise last_error
     raise RuntimeError(f"Gemini failed after retries: {last_error}")
 
 def sample_payload() -> dict[str, Any]:
@@ -977,6 +1040,14 @@ def main() -> int:
                 diff = DiffResult(False, [], [], [])
                 latest_md = build_latest_markdown(payload)
                 changes_md = build_quota_fallback_changes_markdown(payload, exc)
+            elif is_gemini_empty_response_error(exc):
+                print(f"WARN: Gemini returned empty response, keeping latest payload: {exc}", file=sys.stderr)
+                diagnostic = getattr(exc, "diagnostic", "") or str(exc)
+                save_failed_raw_response(diagnostic, exc)
+                payload = load_current_payload_from_files()
+                diff = DiffResult(False, [], [], [])
+                latest_md = build_latest_markdown(payload)
+                changes_md = build_gemini_fallback_changes_markdown(payload, exc, "réponse Gemini vide")
             else:
                 raw_text = locals().get("raw_text", "")
                 if raw_text:
