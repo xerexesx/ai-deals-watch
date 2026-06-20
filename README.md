@@ -26,7 +26,19 @@ Secrets nécessaires :
 
 Le workflow propose un mode `dry_run` pour tester GitHub Actions sans consommer de crédits Gemini.
 
-## 3. Configuration Gemini
+## 3. Setup after fork
+
+Après avoir forké le repo :
+
+1. active GitHub Actions dans le fork ;
+2. crée le secret `GEMINI_API_KEY` dans `Settings -> Secrets and variables -> Actions` ;
+3. ajoute `DISCORD_WEBHOOK_URL` seulement si tu veux recevoir les notifications Discord ;
+4. lance `Actions -> AI Deals Watch -> Run workflow` avec `dry_run=true` pour vérifier le workflow sans appeler Gemini ;
+5. relance ensuite avec `dry_run=false` pour générer la première veille réelle.
+
+Les secrets du repo d’origine ne sont jamais copiés dans les forks. Chaque utilisateur doit fournir ses propres clés.
+
+## 4. Configuration Gemini
 
 Le workflow force une configuration légère adaptée au free tier :
 
@@ -38,7 +50,7 @@ Le workflow force une configuration légère adaptée au free tier :
 
 `GEMINI_MAX_RETRIES=1` évite de brûler plusieurs appels quand Gemini renvoie une réponse vide ou inutilisable.
 
-## 4. Sorties générées
+## 5. Sorties générées
 
 - `data/latest.json`
 - `data/history/*.json`
@@ -48,7 +60,7 @@ Le workflow force une configuration légère adaptée au free tier :
 
 Quand `changed=false`, GitHub Actions ne commit pas les rapports. Les fichiers de debug sont tout de même disponibles dans l’artifact `ai-deals-debug` du run Actions.
 
-## 5. Fallback Gemini
+## 6. Fallback Gemini
 
 Si Gemini échoue avec quota/rate-limit, réponse vide `FinishReason.STOP`, ou JSON invalide :
 
@@ -58,7 +70,7 @@ Si Gemini échoue avec quota/rate-limit, réponse vide `FinishReason.STOP`, ou J
 4. `reports/failed_raw_response.txt` capture le diagnostic quand il existe ;
 5. l’artifact Actions `ai-deals-debug` permet de récupérer les rapports/debug même sans commit.
 
-## 6. Discord
+## 7. Discord
 
 La notification Discord est volontairement courte :
 
@@ -67,14 +79,14 @@ La notification Discord est volontairement courte :
 - limite anti-spam via `DISCORD_MAX_MESSAGES` ;
 - rapport complet disponible dans `reports/latest.md`.
 
-## 7. Tests locaux
+## 8. Tests locaux
 
 ```bash
 python -m py_compile scripts/run_watch.py
 python -m unittest discover -s tests
 ```
 
-## 8. Correction importante Gemini
+## 9. Correction importante Gemini
 
 Cette version n'utilise pas `response_mime_type="application/json"` avec `google_search`.
 La combinaison Google Search tool + JSON MIME est rejetée ou fragile côté API Gemini.
@@ -88,6 +100,6 @@ BEGIN_AI_DEALS_JSON
 END_AI_DEALS_JSON
 ```
 
-## 9. Notes
+## 10. Notes
 
 Le workflow utilise `timezone: "Europe/Paris"` dans les schedules GitHub Actions. Si votre compte/instance ne supporte pas encore cette option, remplacez par un cron UTC.
