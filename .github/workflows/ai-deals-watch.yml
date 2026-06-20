@@ -65,6 +65,17 @@ jobs:
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == 'true' && 'true' || 'false' }}
         run: python scripts/run_watch.py
 
+      - name: Upload debug artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-deals-debug
+          path: |
+            reports/failed_raw_response.txt
+            reports/changes.md
+            reports/latest.md
+          if-no-files-found: ignore
+
       - name: Commit report if changed
         if: steps.watch.outputs.changed == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run == 'true')
         run: |
