@@ -159,6 +159,62 @@ class RunWatchTests(unittest.TestCase):
                 os.environ.clear()
                 os.environ.update(original_env)
 
+    def test_main_reuses_latest_payload_on_invalid_gemini_json(self):
+        payload = run_watch.sample_payload()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            original_paths = {
+                "DATA_DIR": run_watch.DATA_DIR,
+                "HISTORY_DIR": run_watch.HISTORY_DIR,
+                "REPORTS_DIR": run_watch.REPORTS_DIR,
+                "LATEST_JSON": run_watch.LATEST_JSON,
+                "LATEST_MD": run_watch.LATEST_MD,
+                "CHANGES_MD": run_watch.CHANGES_MD,
+                "FAILED_RAW_TXT": run_watch.FAILED_RAW_TXT,
+            }
+            original_call_gemini = run_watch.call_gemini
+            original_notify_discord = run_watch.notify_discord
+            original_env = dict(os.environ)
+
+            try:
+                run_watch.DATA_DIR = tmp_path / "data"
+                run_watch.HISTORY_DIR = run_watch.DATA_DIR / "history"
+                run_watch.REPORTS_DIR = tmp_path / "reports"
+                run_watch.LATEST_JSON = run_watch.DATA_DIR / "latest.json"
+                run_watch.LATEST_MD = run_watch.REPORTS_DIR / "latest.md"
+                run_watch.CHANGES_MD = run_watch.REPORTS_DIR / "changes.md"
+                run_watch.FAILED_RAW_TXT = run_watch.REPORTS_DIR / "failed_raw_response.txt"
+
+                run_watch.DATA_DIR.mkdir()
+                run_watch.REPORTS_DIR.mkdir()
+                run_watch.LATEST_JSON.write_text(run_watch.json.dumps(payload), encoding="utf-8")
+
+                output_path = tmp_path / "github_output.txt"
+                os.environ.clear()
+                os.environ.update({"GITHUB_OUTPUT": str(output_path)})
+
+                run_watch.call_gemini = lambda prompt: "   "
+                notifications = []
+                run_watch.notify_discord = lambda diff, current: notifications.append((diff, current))
+
+                self.assertEqual(run_watch.main(), 0)
+
+                changes = run_watch.CHANGES_MD.read_text(encoding="utf-8")
+                self.assertIn("réponse Gemini invalide", changes)
+                self.assertIn("dernière veille conservée", changes)
+                self.assertTrue(run_watch.FAILED_RAW_TXT.exists())
+                self.assertIn("changed=false", output_path.read_text(encoding="utf-8"))
+                self.assertEqual(len(notifications), 1)
+                self.assertFalse(notifications[0][0].changed)
+            finally:
+                for name, value in original_paths.items():
+                    setattr(run_watch, name, value)
+                run_watch.call_gemini = original_call_gemini
+                run_watch.notify_discord = original_notify_discord
+                os.environ.clear()
+                os.environ.update(original_env)
+
 
 if __name__ == "__main__":
     unittest.main()

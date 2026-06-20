@@ -461,7 +461,7 @@ def is_gemini_quota_error(error: Exception) -> bool:
     return any(marker in text for marker in markers)
 
 
-def build_quota_fallback_changes_markdown(payload: dict[str, Any], error: Exception) -> str:
+def build_gemini_fallback_changes_markdown(payload: dict[str, Any], error: Exception, reason: str) -> str:
     lines = [
         "# Changements veille bons plans IA",
         "",
@@ -472,12 +472,16 @@ def build_quota_fallback_changes_markdown(payload: dict[str, Any], error: Except
         "",
         "Aucun changement détecté.",
         "",
-        "⚠️ quota Gemini saturé, dernière veille conservée.",
+        f"⚠️ {reason}, dernière veille conservée.",
         f"- Dernière veille : `{payload.get('generated_at', 'non précisé')}`",
         f"- Modèle précédent : `{payload.get('model', 'non précisé')}`",
         f"- Erreur : `{clean_text(error, max_chars=240)}`",
     ]
     return "\n".join(lines) + "\n"
+
+
+def build_quota_fallback_changes_markdown(payload: dict[str, Any], error: Exception) -> str:
+    return build_gemini_fallback_changes_markdown(payload, error, "quota Gemini saturé")
 
 
 def split_long_line(line: str, limit: int) -> list[str]:
@@ -977,12 +981,13 @@ def main() -> int:
                 raw_text = locals().get("raw_text", "")
                 if raw_text:
                     save_failed_raw_response(raw_text, exc)
-                    raise RuntimeError(
-                        "Impossible de parser le JSON Gemini. Le brut est sauvegardé dans "
-                        "reports/failed_raw_response.txt. "
-                        "Cause probable : sortie tronquée ou JSON non respecté par le modèle."
-                    ) from exc
-                raise
+                    print(f"WARN: Gemini returned invalid JSON, keeping latest payload: {exc}", file=sys.stderr)
+                    payload = load_current_payload_from_files()
+                    diff = DiffResult(False, [], [], [])
+                    latest_md = build_latest_markdown(payload)
+                    changes_md = build_gemini_fallback_changes_markdown(payload, exc, "réponse Gemini invalide")
+                else:
+                    raise
         else:
             payload = normalize_payload(raw_payload)
             previous = load_previous()
