@@ -23,6 +23,14 @@ class RunWatchTests(unittest.TestCase):
         data = run_watch.extract_json(text)
         self.assertEqual(data["offers"], [])
 
+    def test_extract_json_uses_last_complete_sentinel_block(self):
+        text = (
+            'BEGIN_AI_DEALS_JSON\n{"offers": [{"offer": "old"}], "best_real_use": []}\nEND_AI_DEALS_JSON\n'
+            'BEGIN_AI_DEALS_JSON\n{"offers": [{"offer": "new"}], "best_real_use": []}\nEND_AI_DEALS_JSON'
+        )
+        data = run_watch.extract_json(text)
+        self.assertEqual(data["offers"][0]["offer"], "new")
+
     def test_call_gemini_does_not_force_json_mime_with_google_search(self):
         source = MODULE_PATH.read_text(encoding="utf-8")
         self.assertIn("google_search", source)
@@ -270,6 +278,68 @@ class RunWatchTests(unittest.TestCase):
                 for name, value in original_paths.items():
                     setattr(run_watch, name, value)
                 run_watch.call_gemini = original_call_gemini
+                run_watch.notify_discord = original_notify_discord
+                os.environ.clear()
+                os.environ.update(original_env)
+
+    def test_main_keeps_initial_payload_when_gemini_api_key_missing(self):
+        payload = {
+            "generated_at": "not-generated-yet",
+            "model": "none",
+            "generated_title": "Veille bons plans IA",
+            "generated_summary": "Aucune veille générée pour le moment.",
+            "offers": [],
+            "best_real_use": [],
+            "riskiest_or_unstable": [],
+            "watchlist": [],
+            "critical_sources_used": [],
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            original_paths = {
+                "DATA_DIR": run_watch.DATA_DIR,
+                "HISTORY_DIR": run_watch.HISTORY_DIR,
+                "REPORTS_DIR": run_watch.REPORTS_DIR,
+                "LATEST_JSON": run_watch.LATEST_JSON,
+                "LATEST_MD": run_watch.LATEST_MD,
+                "CHANGES_MD": run_watch.CHANGES_MD,
+                "FAILED_RAW_TXT": run_watch.FAILED_RAW_TXT,
+            }
+            original_notify_discord = run_watch.notify_discord
+            original_env = dict(os.environ)
+
+            try:
+                run_watch.DATA_DIR = tmp_path / "data"
+                run_watch.HISTORY_DIR = run_watch.DATA_DIR / "history"
+                run_watch.REPORTS_DIR = tmp_path / "reports"
+                run_watch.LATEST_JSON = run_watch.DATA_DIR / "latest.json"
+                run_watch.LATEST_MD = run_watch.REPORTS_DIR / "latest.md"
+                run_watch.CHANGES_MD = run_watch.REPORTS_DIR / "changes.md"
+                run_watch.FAILED_RAW_TXT = run_watch.REPORTS_DIR / "failed_raw_response.txt"
+
+                run_watch.DATA_DIR.mkdir()
+                run_watch.REPORTS_DIR.mkdir()
+                run_watch.LATEST_JSON.write_text(run_watch.json.dumps(payload), encoding="utf-8")
+
+                output_path = tmp_path / "github_output.txt"
+                os.environ.clear()
+                os.environ.update({"GITHUB_OUTPUT": str(output_path)})
+
+                notifications = []
+                run_watch.notify_discord = lambda diff, current: notifications.append((diff, current))
+
+                self.assertEqual(run_watch.main(), 0)
+
+                changes = run_watch.CHANGES_MD.read_text(encoding="utf-8")
+                self.assertIn("configuration Gemini absente", changes)
+                self.assertIn("changed=false", output_path.read_text(encoding="utf-8"))
+                self.assertEqual(len(notifications), 1)
+                self.assertFalse(notifications[0][0].changed)
+                self.assertEqual(run_watch.json.loads(run_watch.LATEST_JSON.read_text(encoding="utf-8"))["offers"], [])
+            finally:
+                for name, value in original_paths.items():
+                    setattr(run_watch, name, value)
                 run_watch.notify_discord = original_notify_discord
                 os.environ.clear()
                 os.environ.update(original_env)

@@ -300,10 +300,21 @@ def extract_json(text: str) -> dict[str, Any]:
     # Preferred path: JSON between explicit markers.
     marker_start = "BEGIN_AI_DEALS_JSON"
     marker_end = "END_AI_DEALS_JSON"
-    if marker_start in stripped and marker_end in stripped:
-        start = stripped.index(marker_start) + len(marker_start)
-        end = stripped.rindex(marker_end)
-        candidate = stripped[start:end].strip()
+    marker_blocks: list[str] = []
+    search_pos = 0
+    while True:
+        start = stripped.find(marker_start, search_pos)
+        if start == -1:
+            break
+        content_start = start + len(marker_start)
+        end = stripped.find(marker_end, content_start)
+        if end == -1:
+            break
+        marker_blocks.append(stripped[content_start:end].strip())
+        search_pos = end + len(marker_end)
+
+    if marker_blocks:
+        candidate = marker_blocks[-1]
     else:
         # Fallback path: whole response is JSON, or JSON object is embedded in text.
         candidate = stripped
@@ -476,6 +487,16 @@ def is_gemini_empty_response_error(error: Exception) -> bool:
         "empty response",
         "finishreason.stop",
         "finish_reason=stop",
+    )
+    return any(marker in text for marker in markers)
+
+
+def is_gemini_configuration_error(error: Exception) -> bool:
+    text = f"{type(error).__name__}: {error}".lower()
+    markers = (
+        "gemini_api_key manquant",
+        "missing gemini_api_key",
+        "api key missing",
     )
     return any(marker in text for marker in markers)
 
@@ -1048,6 +1069,12 @@ def main() -> int:
                 diff = DiffResult(False, [], [], [])
                 latest_md = build_latest_markdown(payload)
                 changes_md = build_gemini_fallback_changes_markdown(payload, exc, "réponse Gemini vide")
+            elif is_gemini_configuration_error(exc):
+                print(f"WARN: Gemini configuration missing, keeping latest payload: {exc}", file=sys.stderr)
+                payload = load_current_payload_from_files()
+                diff = DiffResult(False, [], [], [])
+                latest_md = build_latest_markdown(payload)
+                changes_md = build_gemini_fallback_changes_markdown(payload, exc, "configuration Gemini absente")
             else:
                 raw_text = locals().get("raw_text", "")
                 if raw_text:
