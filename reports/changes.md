@@ -1,143 +1,144 @@
 # Changements veille bons plans IA
 
-- Généré le : `2026-08-04T04:33:32+00:00`
-- Nouvelles offres : `8`
-- Offres modifiées : `4`
-- Offres disparues : `8`
+- Généré le : `2026-08-11T03:12:36+00:00`
+- Nouvelles offres : `9`
+- Offres modifiées : `3`
+- Offres disparues : `9`
 
 ## Nouvelles offres
 
-### 🆕 Google Gemini API (AI Studio) — Google
-- Type : LLM API
+### 🆕 Google AI Studio & Gemini API Free Tier — Google
+- Type : LLM API, Image Generation
 - Région : Monde
 - Score usage : 5/5
-- Gain : Accès gratuit et continu aux modèles Gemini Flash et Pro avec des limites de taux généreuses pour le prototypage. Pas de carte bancaire requise pour AI Studio.
-- Limites : Limites de taux inférieures à celles des plans payants. Nécessite Vertex AI pour les charges de production.
-- Pièges : Les limites de taux peuvent être atteintes rapidement pour des usages intensifs.
+- Gain : Jusqu'à 1000 requêtes/jour (Gemini Flash) ou 250 requêtes/jour (Gemini Pro) sur le modèle d'image. Accès API Gemini.
+- Limites : Limites de requêtes par jour/minute. L'éligibilité dépend de la région et de l'âge (18+). Nécessite un compte Google Cloud pour dépasser les limites.
+- Pièges : Les quotas peuvent être stricts. La disponibilité des modèles peut varier. Nécessite un compte Google Cloud pour une utilisation plus poussée.
 - Validité : Non précisé
-- Lien : https://ai.google.dev/
+- Lien : https://ai.google.dev/studio/pricing
 
-### 🆕 Mistral AI Free Tier (La Plateforme) — Mistral AI
-- Type : LLM API
+### 🆕 Cloudflare AI Gateway Free Tier — Cloudflare
+- Type : API Gateway, Rate Limiting, Caching
 - Région : Monde
 - Score usage : 4/5
-- Gain : Accès gratuit avec limites de taux pour l'expérimentation et le prototypage sur tous les modèles. Pas de carte bancaire requise.
-- Limites : Limites de taux d'environ 1 requête/seconde et 30 requêtes/minute. Pas pour la production.
-- Pièges : Les limites de taux sont conçues pour le test, pas pour la production.
+- Gain : Accès aux fonctionnalités de base (analytics, caching, rate limiting) sans frais par appel. 100 000 logs AI Gateway par mois.
+- Limites : Limite de 100 000 logs par mois sur le plan gratuit. L'utilisation intensive des Workers peut entraîner des coûts. Les logs au-delà du quota ne sont pas stockés.
+- Pièges : Le plafond de logs peut être rapidement atteint pour des applications à fort trafic. Les coûts des Workers peuvent s'accumuler si l'utilisation est très élevée.
 - Validité : Non précisé
-- Lien : https://mistral.ai/la-plateforme/
+- Lien : https://www.cloudflare.com/fr-fr/products/ai-gateway/
 
-### 🆕 Anthropic Free Credits — Anthropic
-- Type : LLM API
+### 🆕 Amazon Polly Free Tier — AWS
+- Type : Text-to-Speech API
 - Région : Monde
 - Score usage : 3/5
-- Gain : Crédits gratuits initiaux pour les nouveaux comptes API afin d'évaluer Claude Haiku.
-- Limites : Crédits limités et variables. Limites de requêtes et de tokens par jour pour le prototypage.
-- Pièges : Crédits finis, conçus pour l'évaluation et non pour la production continue.
-- Validité : Non précisé (crédits d'essai)
-- Lien : https://www.anthropic.com/pricing
+- Gain : 5 millions de caractères par mois pendant les 12 premiers mois.
+- Limites : Valable pour les 12 premiers mois suivant la création du compte AWS. Nécessite un compte AWS.
+- Pièges : La limite de 12 mois peut être un piège pour une utilisation à long terme. Nécessite une configuration AWS.
+- Validité : Non précisé
+- Lien : https://aws.amazon.com/polly/pricing/
 
-### 🆕 Together AI New User Credits — Together AI
-- Type : Inference Provider (LLM API)
+### 🆕 Google Cloud TTS Free Tier — Google Cloud
+- Type : Text-to-Speech API
 - Région : Monde
 - Score usage : 4/5
-- Gain : Crédits gratuits à l'inscription (25-50 $) pour accéder à plus de 100 modèles open-source.
-- Limites : Les crédits d'essai ont une expiration typique de 30-90 jours.
-- Pièges : Les crédits d'essai sont limités dans le temps et en montant.
-- Validité : Non précisé (crédits d'essai)
-- Lien : https://api.together.ai/
-
-### 🆕 Fireworks AI New User Credits — Fireworks AI
-- Type : Inference Provider (LLM API)
-- Région : Monde
-- Score usage : 2/5
-- Gain : Crédits gratuits pour tester l'API d'inférence (environ 1 $).
-- Limites : Crédits de démarrage limités pour des tests rapides. Nécessite une carte bancaire pour continuer après épuisement.
-- Pièges : Montant très limité, conçu uniquement pour des tests initiaux.
+- Gain : 1 million de caractères par mois (voix standard) ou 250 000 caractères (voix WaveNet/Neural2).
+- Limites : Nécessite un compte Google Cloud et l'activation de la facturation (pas de frais tant que les limites ne sont pas dépassées).
+- Pièges : Activation de la facturation requise, ce qui peut être un frein pour certains. Les limites de caractères peuvent être atteintes rapidement avec des textes longs.
 - Validité : Non précisé
-- Lien : https://fireworks.ai/
+- Lien : https://cloud.google.com/text-to-speech/pricing
 
-### 🆕 AWS Free Tier (SageMaker) — AWS
-- Type : Cloud ML Platform
+### 🆕 Microsoft Azure TTS Free Tier — Microsoft Azure
+- Type : Text-to-Speech API
 - Région : Monde
 - Score usage : 3/5
-- Gain : 250 heures/mois d'utilisation de notebooks ml.t3.medium pendant 2 mois.
-- Limites : Limité à 2 mois. Les crédits AWS globaux peuvent être utilisés pour Bedrock.
-- Pièges : Durée limitée à 2 mois. Les crédits AWS globaux sont plus flexibles mais limités dans le temps.
-- Validité : 2 mois
-- Lien : https://aws.amazon.com/sagemaker/
+- Gain : 500 000 caractères neuronaux par mois.
+- Limites : Nécessite un compte Azure. Pas de date d'expiration précisée pour le niveau F0.
+- Pièges : Nécessite une configuration Azure. Le quota peut être limitant pour des projets à gros volume.
+- Validité : Non précisé
+- Lien : https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/
 
-### 🆕 Vast.ai Startup Program — Vast.ai
-- Type : GPU Cloud
+### 🆕 Vast.ai Marketplace — Vast.ai
+- Type : GPU Cloud, Inference
 - Région : Monde
 - Score usage : 4/5
-- Gain : Jusqu'à 2 500 $ de crédits GPU gratuits pour les startups déplaçant leurs charges de travail IA.
-- Limites : Destiné aux startups IA qui déplacent leurs charges de travail GPU vers Vast.ai. Nécessite une application et approbation.
-- Pièges : Principalement axé sur les startups et nécessite une application. Pas de crédits directs sans validation.
+- Gain : Accès à une large gamme de GPUs à des prix compétitifs (à partir de 0.02$/hr pour des GPUs plus anciens).
+- Limites : Prix fluctuants basés sur l'offre et la demande. Minimum de dépôt de 5$ requis (carte bancaire ou crypto). Le stockage est facturé séparément.
+- Pièges : La fiabilité peut varier considérablement entre les hôtes. Le stockage est facturé même lorsque les instances sont arrêtées. Nécessite une carte bancaire ou crypto pour le dépôt.
 - Validité : Non précisé
-- Lien : https://vast.ai/startup-program
+- Lien : https://vast.ai/
 
-### 🆕 Railway Free Trial Credits — Railway
-- Type : PaaS
+### 🆕 AWS Free Tier (Selected AI Services) — AWS
+- Type : Various AI Services (Rekognition, Comprehend, Lex, Transcribe, Polly)
 - Région : Monde
-- Score usage : 2/5
-- Gain : 5 $ de crédits d'essai gratuits pour 30 jours.
-- Limites : Nécessite une carte bancaire pour le trial. Après le trial, le plan gratuit offre 1 $/mois de crédits non reportables.
-- Pièges : Le trial est limité à 30 jours et 5 $. Le plan gratuit est très limité (1 $/mois).
-- Validité : 30 jours (crédits d'essai)
-- Lien : https://railway.app/
+- Score usage : 4/5
+- Gain : Limites mensuelles généreuses pour plusieurs services IA (ex: 1000 images/mois pour Rekognition, 5M caractères/mois pour Comprehend pendant 12 mois).
+- Limites : Certains services sont limités aux 12 premiers mois. D'autres sont 'toujours gratuits' avec des limites mensuelles. Nécessite un compte AWS.
+- Pièges : La limite de 12 mois pour certains services est un piège. La complexité de l'écosystème AWS peut être intimidante. Risque de dépassement des quotas.
+- Validité : Non précisé
+- Lien : https://aws.amazon.com/free/
+
+### 🆕 Google Cloud Free Tier ($300 Credits) — Google Cloud
+- Type : Cloud Services, AI APIs
+- Région : Monde
+- Score usage : 4/5
+- Gain : 300$ de crédits pour essayer les produits Google Cloud pendant une période limitée.
+- Limites : Les crédits sont valables pour une durée limitée (souvent 90 jours) et doivent être utilisés pour tester des services. Nécessite un compte Google Cloud et l'activation de la facturation.
+- Pièges : Les crédits expirent. L'activation de la facturation est requise. L'écosystème GCP peut être complexe.
+- Validité : Non précisé
+- Lien : https://cloud.google.com/free
+
+### 🆕 AssemblyAI Free Tier — AssemblyAI
+- Type : Speech-to-Text API
+- Région : Monde
+- Score usage : 3/5
+- Gain : Crédits gratuits à l'inscription pour tester l'API (montant non précisé mais suffisant pour du prototypage).
+- Limites : Les crédits sont à l'inscription et sont limités. Le passage en production est payant.
+- Pièges : Les crédits gratuits sont limités et destinés au test. Le passage en production peut être coûteux.
+- Validité : Non précisé
+- Lien : https://www.assemblyai.com/
 
 
 ## Offres modifiées
 
-### ♻️ Groq Free Tier — Groq
-- Type : Inference Provider (LLM API)
+### ♻️ Hugging Face Inference API (Serverless Free Tier) — Hugging Face
+- Type : Inference API, Model Hosting
 - Région : Monde
 - Score usage : 4/5
-- Gain : Accès gratuit à tous les modèles avec 30 000 tokens/minute et 14 400 requêtes/jour. Latence sub-secondes. Pas de carte bancaire requise.
-- Limites : Limites de taux appliquées au niveau de l'organisation. Gamme de modèles curated.
-- Pièges : Les limites de taux peuvent être restrictives pour la production à grande échelle.
-- Validité : Permanent
-- Lien : https://groq.com/
-
-### ♻️ Hugging Face Inference API (Serverless) — Hugging Face
-- Type : Inference Provider (LLM API)
-- Région : Monde
-- Score usage : 3/5
-- Gain : Accès gratuit à des centaines de modèles (jusqu'à ~10B paramètres) avec quelques centaines de requêtes par heure. Idéal pour le prototypage.
-- Limites : Limites de taux, modèles limités en taille, démarrages à froid possibles.
-- Pièges : Les démarrages à froid peuvent entraîner des latences notables. Limité aux modèles plus petits.
+- Gain : Quelques centaines de requêtes par heure pour les modèles < 10B paramètres. Idéal pour le prototypage.
+- Limites : Limité aux modèles < 10B paramètres. Cold starts possibles sur les modèles moins populaires (10-30s).
+- Pièges : Les limites de requêtes peuvent être restrictives pour une utilisation intensive. Les cold starts peuvent impacter la latence.
 - Validité : Non précisé
 - Lien : https://huggingface.co/inference-api
 
-### ♻️ OpenAI Free Credits — OpenAI
-- Type : LLM API
+### ♻️ RunPod Starter Tier Credits — RunPod
+- Type : GPU Cloud, Inference
 - Région : Monde
 - Score usage : 3/5
-- Gain : Crédits gratuits pour tester les modèles GPT-4o Mini et GPT-3.5 Turbo.
-- Limites : Crédits d'essai limités (environ 5$). Les crédits expirent une fois épuisés. Nécessite une carte bancaire pour continuer.
-- Pièges : Les crédits sont limités et expirent rapidement. Pas d'accès gratuit continu.
-- Validité : Non précisé (crédits d'essai)
-- Lien : https://openai.com/pricing
-
-### ♻️ RunPod Starter Tier Credits — RunPod
-- Type : GPU Cloud
-- Région : Monde
-- Score usage : 4/5
-- Gain : 1 000 $ de crédits pour commencer sur la plateforme avec accès complet.
-- Limites : Destiné aux startups avec des charges de travail IA réelles et un chemin clair vers la mise à l'échelle. Préférence pour les startups financées par du capital-risque.
-- Pièges : Le programme est orienté startups et peut nécessiter une validation. Les crédits sont pour le démarrage.
+- Gain : 1000$ de crédits pour l'accès à la plateforme.
+- Limites : Destiné aux startups. La préférence est donnée aux entreprises ayant levé des fonds. L'offre peut être soumise à une validation.
+- Pièges : Principalement orienté startups et potentiellement VC-backed. Peut nécessiter une validation d'éligibilité.
 - Validité : Non précisé
 - Lien : https://www.runpod.io/startup-program
+
+### ♻️ Together AI Trial Credits — Together AI
+- Type : Inference API, Model Hosting
+- Région : Monde
+- Score usage : 4/5
+- Gain : 25$ à 50$ de crédits d'essai pour les nouveaux comptes.
+- Limites : Les crédits ont une durée de validité typique de 30-90 jours.
+- Pièges : Les crédits d'essai ont une durée de vie limitée. L'offre Startup Accelerator ($50K) est plus adaptée aux entreprises établies.
+- Validité : Non précisé
+- Lien : https://api.together.ai/
 
 
 ## Offres disparues du top
 
-- Free Tier pour LLM Rapides et Long Context — Google AI Studio
-- Free Tier pour LLM et Modèles Spécialisés — Mistral AI
-- Plateforme de Déploiement avec Free Tier Limité — Railway
-- Crédits de Démarrage pour Inference Optimisée — Fireworks AI
-- Free Tier pour Modèles Open-Source et Routeur — OpenRouter
-- Free Tier pour Agents IA et Orchestration — LangGraph (LangChain)
-- Free Tier pour Modèles Open-Source — Together AI
-- Free Tier pour API d'Inférence — Cloudflare Workers AI
+- Google Gemini API (AI Studio) — Google
+- Groq Free Tier — Groq
+- Mistral AI Free Tier (La Plateforme) — Mistral AI
+- OpenAI Free Credits — OpenAI
+- Anthropic Free Credits — Anthropic
+- Fireworks AI New User Credits — Fireworks AI
+- AWS Free Tier (SageMaker) — AWS
+- Vast.ai Startup Program — Vast.ai
+- Railway Free Trial Credits — Railway
