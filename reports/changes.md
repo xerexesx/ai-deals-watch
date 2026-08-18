@@ -1,144 +1,146 @@
 # Changements veille bons plans IA
 
-- Généré le : `2026-08-11T03:12:36+00:00`
-- Nouvelles offres : `9`
-- Offres modifiées : `3`
-- Offres disparues : `9`
+- Généré le : `2026-08-18T02:31:45+00:00`
+- Nouvelles offres : `11`
+- Offres modifiées : `1`
+- Offres disparues : `11`
 
 ## Nouvelles offres
 
-### 🆕 Google AI Studio & Gemini API Free Tier — Google
-- Type : LLM API, Image Generation
+### 🆕 Groq Free Tier — Groq
+- Type : API LLM
 - Région : Monde
 - Score usage : 5/5
-- Gain : Jusqu'à 1000 requêtes/jour (Gemini Flash) ou 250 requêtes/jour (Gemini Pro) sur le modèle d'image. Accès API Gemini.
-- Limites : Limites de requêtes par jour/minute. L'éligibilité dépend de la région et de l'âge (18+). Nécessite un compte Google Cloud pour dépasser les limites.
-- Pièges : Les quotas peuvent être stricts. La disponibilité des modèles peut varier. Nécessite un compte Google Cloud pour une utilisation plus poussée.
+- Gain : 30,000 tokens/minute, 14,400 requests/day on curated models (Llama 3.1 8B, Llama 4 Scout, Qwen3 32B, DeepSeek R1 Distill). Sub-second latency.
+- Limites : Rate limits apply at organization level. Model lineup is curated. Not suitable for production traffic or large batch jobs.
+- Pièges : Model selection is limited. Free tier is for testing/prototyping, not production scale.
 - Validité : Non précisé
-- Lien : https://ai.google.dev/studio/pricing
+- Lien : https://groq.com/
 
-### 🆕 Cloudflare AI Gateway Free Tier — Cloudflare
-- Type : API Gateway, Rate Limiting, Caching
+### 🆕 Google AI Studio (Gemini API Free Tier) — Google
+- Type : API LLM
+- Région : Monde
+- Score usage : 5/5
+- Gain : 1,500 requests/day, 1 million token context window, multimodal capabilities. No credit card required. No expiration.
+- Limites : 15 requests per minute cap. Free tier is for prototyping; data may be used for training (opt-out available).
+- Pièges : Rate limit can be hit with rapid tool calls. Data usage for training is a potential concern.
+- Validité : Non précisé
+- Lien : https://aistudio.google.com/
+
+### 🆕 RunPod Free Credits — RunPod
+- Type : GPU Cloud
 - Région : Monde
 - Score usage : 4/5
-- Gain : Accès aux fonctionnalités de base (analytics, caching, rate limiting) sans frais par appel. 100 000 logs AI Gateway par mois.
-- Limites : Limite de 100 000 logs par mois sur le plan gratuit. L'utilisation intensive des Workers peut entraîner des coûts. Les logs au-delà du quota ne sont pas stockés.
-- Pièges : Le plafond de logs peut être rapidement atteint pour des applications à fort trafic. Les coûts des Workers peuvent s'accumuler si l'utilisation est très élevée.
+- Gain : $10 in credits for new accounts, valid for ~29 hours on RTX 4090 or ~3.7 hours on H100.
+- Limites : Credits apply immediately upon registration. No payment method required initially. No ongoing free tier.
+- Pièges : Credits are a one-time signup bonus, not a recurring free tier. Storage is billed separately even when pods are stopped.
 - Validité : Non précisé
-- Lien : https://www.cloudflare.com/fr-fr/products/ai-gateway/
+- Lien : https://www.runpod.io/
 
-### 🆕 Amazon Polly Free Tier — AWS
-- Type : Text-to-Speech API
+### 🆕 Mistral AI Free Tier (API) — Mistral AI
+- Type : API LLM
 - Région : Monde
 - Score usage : 3/5
-- Gain : 5 millions de caractères par mois pendant les 12 premiers mois.
-- Limites : Valable pour les 12 premiers mois suivant la création du compte AWS. Nécessite un compte AWS.
-- Pièges : La limite de 12 mois peut être un piège pour une utilisation à long terme. Nécessite une configuration AWS.
+- Gain : Rate-limited access to all models for evaluation and prototyping. No credit card required.
+- Limites : Rate limits of approx. 1 request/second and 30 requests/minute. Not for production workloads.
+- Pièges : API and Le Chat are billed separately. Free tier is for testing, not production.
 - Validité : Non précisé
-- Lien : https://aws.amazon.com/polly/pricing/
+- Lien : https://mistral.ai/
 
-### 🆕 Google Cloud TTS Free Tier — Google Cloud
-- Type : Text-to-Speech API
+### 🆕 Together AI Free Credits — Together AI
+- Type : API LLM / GPU Cloud
 - Région : Monde
 - Score usage : 4/5
-- Gain : 1 million de caractères par mois (voix standard) ou 250 000 caractères (voix WaveNet/Neural2).
-- Limites : Nécessite un compte Google Cloud et l'activation de la facturation (pas de frais tant que les limites ne sont pas dépassées).
-- Pièges : Activation de la facturation requise, ce qui peut être un frein pour certains. Les limites de caractères peuvent être atteintes rapidement avec des textes longs.
+- Gain : $5-$50 in free credits on signup for prototyping. Startup program offers up to $50,000 in credits.
+- Limites : Credits apply to serverless inference, dedicated endpoints, fine-tuning, and clusters. Startup program requires application and may have stage-based credit amounts.
+- Pièges : Startup program eligibility and credit amounts vary. No advertised permanent free tier beyond initial credits.
 - Validité : Non précisé
-- Lien : https://cloud.google.com/text-to-speech/pricing
+- Lien : https://www.together.ai/
 
-### 🆕 Microsoft Azure TTS Free Tier — Microsoft Azure
-- Type : Text-to-Speech API
+### 🆕 Oracle Cloud Free Tier (Always Free) — Oracle
+- Type : Cloud Infrastructure / GPU
+- Région : Monde
+- Score usage : 4/5
+- Gain : Always Free services include 2 Autonomous AI Databases, AMD/Arm Compute VMs, 200GB block storage, 10TB egress/month. Also $300 credit for 30 days.
+- Limites : Always Free services have capacity limits. Free trial credits expire after 30 days. Free tier is limited to specific regions.
+- Pièges : GPU availability on free tier can be limited or require specific VM types. 10TB egress limit can be hit.
+- Validité : Non précisé
+- Lien : https://www.oracle.com/cloud/free/
+
+### 🆕 OpenRouter (Free Models) — OpenRouter
+- Type : API Router / LLM
+- Région : Monde
+- Score usage : 4/5
+- Gain : Access to free variants of models like DeepSeek R1, DeepSeek V3, Llama 4 Maverick, Qwen3 235B. Model variety and easy switching.
+- Limites : Free tier has reduced rate limits and is subject to provider-specific limits. Not for production traffic.
+- Pièges : Reliance on free variants means potential for lower performance or availability compared to paid tiers. Rate limits can be restrictive.
+- Validité : Non précisé
+- Lien : https://openrouter.ai/
+
+### 🆕 AWS Activate (via NVIDIA Inception) — AWS
+- Type : Cloud Infrastructure / GPU
 - Région : Monde
 - Score usage : 3/5
-- Gain : 500 000 caractères neuronaux par mois.
-- Limites : Nécessite un compte Azure. Pas de date d'expiration précisée pour le niveau F0.
-- Pièges : Nécessite une configuration Azure. Le quota peut être limitant pour des projets à gros volume.
+- Gain : Up to $100,000 in EC2 credits for NVIDIA Inception members. Part of a larger credit stacking strategy.
+- Limites : Requires joining NVIDIA Inception (free, no equity). AWS credits may have specific usage terms and expiration. Higher tiers may require VC affiliation.
+- Pièges : Access to the highest credit amounts often requires VC backing or accelerator affiliation, making it less accessible for solo founders without those connections.
 - Validité : Non précisé
-- Lien : https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/
+- Lien : https://www.nvidia.com/en-us/startups/
 
-### 🆕 Vast.ai Marketplace — Vast.ai
-- Type : GPU Cloud, Inference
-- Région : Monde
-- Score usage : 4/5
-- Gain : Accès à une large gamme de GPUs à des prix compétitifs (à partir de 0.02$/hr pour des GPUs plus anciens).
-- Limites : Prix fluctuants basés sur l'offre et la demande. Minimum de dépôt de 5$ requis (carte bancaire ou crypto). Le stockage est facturé séparément.
-- Pièges : La fiabilité peut varier considérablement entre les hôtes. Le stockage est facturé même lorsque les instances sont arrêtées. Nécessite une carte bancaire ou crypto pour le dépôt.
-- Validité : Non précisé
-- Lien : https://vast.ai/
-
-### 🆕 AWS Free Tier (Selected AI Services) — AWS
-- Type : Various AI Services (Rekognition, Comprehend, Lex, Transcribe, Polly)
-- Région : Monde
-- Score usage : 4/5
-- Gain : Limites mensuelles généreuses pour plusieurs services IA (ex: 1000 images/mois pour Rekognition, 5M caractères/mois pour Comprehend pendant 12 mois).
-- Limites : Certains services sont limités aux 12 premiers mois. D'autres sont 'toujours gratuits' avec des limites mensuelles. Nécessite un compte AWS.
-- Pièges : La limite de 12 mois pour certains services est un piège. La complexité de l'écosystème AWS peut être intimidante. Risque de dépassement des quotas.
-- Validité : Non précisé
-- Lien : https://aws.amazon.com/free/
-
-### 🆕 Google Cloud Free Tier ($300 Credits) — Google Cloud
-- Type : Cloud Services, AI APIs
-- Région : Monde
-- Score usage : 4/5
-- Gain : 300$ de crédits pour essayer les produits Google Cloud pendant une période limitée.
-- Limites : Les crédits sont valables pour une durée limitée (souvent 90 jours) et doivent être utilisés pour tester des services. Nécessite un compte Google Cloud et l'activation de la facturation.
-- Pièges : Les crédits expirent. L'activation de la facturation est requise. L'écosystème GCP peut être complexe.
-- Validité : Non précisé
-- Lien : https://cloud.google.com/free
-
-### 🆕 AssemblyAI Free Tier — AssemblyAI
-- Type : Speech-to-Text API
+### 🆕 Microsoft Founders Hub (Azure Credits) — Microsoft
+- Type : Cloud Infrastructure
 - Région : Monde
 - Score usage : 3/5
-- Gain : Crédits gratuits à l'inscription pour tester l'API (montant non précisé mais suffisant pour du prototypage).
-- Limites : Les crédits sont à l'inscription et sont limités. Le passage en production est payant.
-- Pièges : Les crédits gratuits sont limités et destinés au test. Le passage en production peut être coûteux.
+- Gain : Up to $150,000 in Azure credits. Accessible without VC funding if a live product with verified traction exists.
+- Limites : Requires a live product with verified traction. Credits have usage terms and expiration.
+- Pièges : The 'verified traction' requirement can be a barrier for early-stage solo builders without existing users or revenue.
 - Validité : Non précisé
-- Lien : https://www.assemblyai.com/
+- Lien : https://www.microsoft.com/en-us/startups
+
+### 🆕 Google Cloud for Startups — Google
+- Type : Cloud Infrastructure
+- Région : Monde
+- Score usage : 3/5
+- Gain : Up to $350,000 in credits for AI-first startups up to Series A with VC backing.
+- Limites : Top tier requires nomination from an affiliated VC or accelerator. Focuses on Google Cloud infrastructure.
+- Pièges : The highest credit tiers are gated behind VC backing or investor introductions, making them less accessible for bootstrapped founders.
+- Validité : Non précisé
+- Lien : https://cloud.google.com/startup
+
+### 🆕 OpenAI Free Tier (Limited) — OpenAI
+- Type : API LLM
+- Région : Monde
+- Score usage : 1/5
+- Gain : Access to GPT-3.5 Turbo with 3 requests per minute (RPM). Minimum $5 investment for full API access.
+- Limites : Severely limited RPM. Only GPT-3.5 Turbo available. Free trial credits discontinued for most new accounts.
+- Pièges : Extremely restrictive for any serious development. Minimum $5 spend required for practical use.
+- Validité : Non précisé
+- Lien : https://platform.openai.com/docs/guides/rate-limits
 
 
 ## Offres modifiées
 
 ### ♻️ Hugging Face Inference API (Serverless Free Tier) — Hugging Face
-- Type : Inference API, Model Hosting
+- Type : API Inference
 - Région : Monde
 - Score usage : 4/5
-- Gain : Quelques centaines de requêtes par heure pour les modèles < 10B paramètres. Idéal pour le prototypage.
-- Limites : Limité aux modèles < 10B paramètres. Cold starts possibles sur les modèles moins populaires (10-30s).
-- Pièges : Les limites de requêtes peuvent être restrictives pour une utilisation intensive. Les cold starts peuvent impacter la latence.
+- Gain : Few hundred requests/hour, access to models under ~10B parameters. Good for text classification, embeddings, small LLMs.
+- Limites : Rate limits apply. Cold starts on less popular models (10-30 seconds). Free tier has $0.10 monthly credit allowance.
+- Pièges : Rate limits can be restrictive for heavy usage. Cold starts impact latency.
 - Validité : Non précisé
 - Lien : https://huggingface.co/inference-api
-
-### ♻️ RunPod Starter Tier Credits — RunPod
-- Type : GPU Cloud, Inference
-- Région : Monde
-- Score usage : 3/5
-- Gain : 1000$ de crédits pour l'accès à la plateforme.
-- Limites : Destiné aux startups. La préférence est donnée aux entreprises ayant levé des fonds. L'offre peut être soumise à une validation.
-- Pièges : Principalement orienté startups et potentiellement VC-backed. Peut nécessiter une validation d'éligibilité.
-- Validité : Non précisé
-- Lien : https://www.runpod.io/startup-program
-
-### ♻️ Together AI Trial Credits — Together AI
-- Type : Inference API, Model Hosting
-- Région : Monde
-- Score usage : 4/5
-- Gain : 25$ à 50$ de crédits d'essai pour les nouveaux comptes.
-- Limites : Les crédits ont une durée de validité typique de 30-90 jours.
-- Pièges : Les crédits d'essai ont une durée de vie limitée. L'offre Startup Accelerator ($50K) est plus adaptée aux entreprises établies.
-- Validité : Non précisé
-- Lien : https://api.together.ai/
 
 
 ## Offres disparues du top
 
-- Google Gemini API (AI Studio) — Google
-- Groq Free Tier — Groq
-- Mistral AI Free Tier (La Plateforme) — Mistral AI
-- OpenAI Free Credits — OpenAI
-- Anthropic Free Credits — Anthropic
-- Fireworks AI New User Credits — Fireworks AI
-- AWS Free Tier (SageMaker) — AWS
-- Vast.ai Startup Program — Vast.ai
-- Railway Free Trial Credits — Railway
+- Google AI Studio & Gemini API Free Tier — Google
+- Cloudflare AI Gateway Free Tier — Cloudflare
+- Amazon Polly Free Tier — AWS
+- Google Cloud TTS Free Tier — Google Cloud
+- Microsoft Azure TTS Free Tier — Microsoft Azure
+- RunPod Starter Tier Credits — RunPod
+- Vast.ai Marketplace — Vast.ai
+- Together AI Trial Credits — Together AI
+- AWS Free Tier (Selected AI Services) — AWS
+- Google Cloud Free Tier ($300 Credits) — Google Cloud
+- AssemblyAI Free Tier — AssemblyAI
