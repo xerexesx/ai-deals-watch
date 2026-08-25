@@ -1,63 +1,65 @@
-# Meilleures Offres IA pour Prototypage et Préproduction (Juillet 2026)
+# Top 12 Offres IA pour Prototypage et Préproduction (2026)
 
-- Généré le : `2026-08-21T02:48:25+00:00`
+- Généré le : `2026-08-25T02:32:50+00:00`
 - Modèle : `gemini-2.5-flash-lite`
-- Offres retenues : `11`
+- Offres retenues : `12`
 
 ## Résumé
 
-Cette veille présente les 12 meilleures offres IA pour le prototypage et la préproduction, axée sur les freelances et les solo builders. Elle privilégie les free tiers généreux, les crédits de démarrage sans condition, et les accès API pratiques. Les offres couvrent les LLMs, l'inférence, le cloud GPU, et les outils d'automatisation, avec une attention particulière aux limites réelles et aux pièges potentiels. Les sources sont vérifiées pour garantir l'utilité et la fiabilité.
+Cette veille compacte présente les 12 meilleures offres IA pour le prototypage sérieux et la préproduction, axée sur les freelances et les solo builders. Elle priorise les offres nouvelles ou modifiées, les sources officielles, et met en lumière les free tiers généreux, les crédits d'inscription, et les accès gratuits réels. Les offres couvrent les API LLM, les fournisseurs d'inférence, le cloud GPU, les agents, et les API multimédias, avec une attention particulière aux limites pratiques et au…
 
 ## Tableau compact
 
 | Rang | Offre | Type | Région | Ce que je gagne | Conditions / limites | Problèmes / pièges | Validité | Lien |
 |---:|---|---|---|---|---|---|---|---|
-| 1 | Accès illimité aux modèles Gemini (Free Tier) (Google AI Studio / Vertex AI) | API LLM / Modèles | Monde | Accès illimité aux modèles Gemini (Flash, Pro) avec des limites de requêtes par minute/jour. Pas de carte bancaire requise. | 15 RPM pour Gemini Flash, 2 RPM pour Gemini Pro. Limites journalières de requêtes. Pas de support production. | Les limites de RPM peuvent être restrictives pour une utilisation intensive en production. | Non précisé | https://ai.google.dev/ |
-| 2 | Crédits d'essai OpenAI (OpenAI) | API LLM / Modèles | Monde | $5 de crédits d'essai gratuits pour les nouveaux comptes, utilisables sur tous les modèles (GPT-4o, etc.). | Expiration après 3 mois. Nécessite une carte bancaire pour dépasser le quota. | Crédits limités et expirant rapidement. L'accès aux modèles les plus récents (GPT-5) nécessite un compte payant. | Non précisé | https://platform.openai.com/ |
-| 3 | Free Tier Inference API (Hugging Face) | API LLM / Modèles / Inference | Monde | Accès gratuit à des milliers de modèles open-source via l'API Serverless. Quelques centaines de requêtes par heure. | Limité aux modèles de moins de 10 milliards de paramètres. Cold starts possibles. Quelques centaines de requêtes/heure. | Cold starts peuvent entraîner une latence élevée. Limité aux modèles plus petits pour le free tier. | Non précisé | https://huggingface.co/inference-api |
-| 4 | Free Tier API (1000 appels/mois) (Cohere) | API LLM / Embeddings / Rerank | Monde | 1000 appels API par mois sur tous les modèles (Command R+, Rerank, Embed). Pas de carte bancaire requise. | 100 RPM pour le chat, 5 RPM pour les embeddings. Usage non-commercial explicitement mentionné pour le trial. | Le quota mensuel est rapidement atteint pour un usage intensif. Usage non-commercial pour le trial. | Non précisé | https://cohere.com/pricing |
-| 5 | Free Tier API (30 RPM) (Groq) | API LLM / Inference Rapide | Monde | Accès gratuit aux modèles open-source avec une inférence ultra-rapide. 30 RPM, 6000-30000 tokens/min. | Limité aux modèles open-source (pas de GPT-4, Claude, Gemini). Limites par organisation. | Catalogue limité aux modèles open-source. Les limites RPM peuvent être atteintes rapidement en cas d'usage concurrent. | Non précisé | https://groq.com/ |
-| 6 | Free Tier GPU Cloud (RunPod) | GPU Cloud / Inference | Monde | Accès à des GPUs variés (RTX, A100, H100) à des tarifs compétitifs. Pas de free tier permanent, mais des crédits startup intéressants. | Pas de free tier permanent pour les nouveaux utilisateurs. Programme startup avec crédits ($2500 ou matching). | Le programme startup nécessite une application et est destiné aux startups. Pas de free tier pour usage général. | Non précisé | https://www.runpod.io/ |
-| 7 | Crédits de démarrage / Free Tier (limité) (Railway) | PaaS / Deployment | Monde | $5 de crédits gratuits pour 30 jours. Ensuite, plan Hobby à $5/mois avec $5 de crédits. | Nécessite une carte bancaire pour s'inscrire. Les services sont pausés après épuisement des crédits ou 30 jours. | Pas de free tier permanent. Les crédits sont limités et expirent. Carte bancaire requise. | Non précisé | https://railway.app/ |
-| 8 | Free Tier (modèles <10B params) (Cloudflare Workers AI) | Inference / Edge AI | Monde | 10,000 requêtes d'inférence gratuites par jour sur plusieurs modèles open-source (Llama, Mistral, Stable Diffusion). | Limité aux modèles de taille raisonnable. Requêtes par jour. | Peut nécessiter une configuration spécifique pour l'intégration. Limites quotidiennes. | Non précisé | https://developers.cloudflare.com/workers-ai/ |
-| 9 | Crédits Startup ($2,500) (Vast.ai) | GPU Cloud / Inference | Monde | $2,500 de crédits GPU gratuits pour les startups éligibles. Support prioritaire 24/7. | Programme destiné aux startups. Nécessite une application et une validation. Crédits liés à l'utilisation. | Pas un free tier généraliste. Destiné aux startups avec des besoins de calcul importants. | Non précisé | https://vast.ai/startup-program |
-| 11 | Free Tier (modèles open-source) (Mistral AI (La Plateforme)) | API LLM / Modèles | Monde | Accès gratuit aux modèles Mistral plus petits via leur plateforme API. | Non précisé pour les limites exactes du free tier, mais généralement des crédits d'essai ou des quotas limités. | Les détails du free tier sont souvent flous, nécessitant une inscription pour confirmation. | Non précisé | https://mistral.ai/platform/ |
-| 12 | Crédits de démarrage (200 requêtes/jour) (Requesty) | API LLM / Router | Europe | 200 requêtes gratuites par jour sur des modèles open-source via une API compatible OpenAI. Pas de carte bancaire. | Limité à 200 requêtes/jour. Routing et caching inclus. | Le quota quotidien est faible pour une utilisation intensive. La sélection de modèles gratuits peut varier. | Non précisé | https://requesty.ai/ |
+| 1 | Gemini API (via AI Studio) (Google) | API LLM, Image Generation | Monde | Accès gratuit et continu aux modèles Gemini Flash et Pro (texte, image). Généreux quotas journaliers pour le prototypage. Pas de carte bancaire requise pour AI Studio. | Limites de débit réduites par rapport aux plans payants. Nécessite Vertex AI pour les charges de production. | Les quotas, bien que généreux, peuvent être limitants pour une utilisation intensive en production. | Non précisé | https://ai.google.dev/ |
+| 2 | Groq Free Tier (Groq) | API LLM (Inference) | Monde | Inférence ultra-rapide sur modèles open-source (Llama, Qwen). 30 RPM, 14,400 RPD, 6,000 TPM. Pas de carte bancaire requise. | Modèles open-source uniquement. Limites de débit strictes pour la production. | La sélection de modèles est limitée aux modèles open-source. Les limites de débit peuvent être atteintes rapidement en production. | Non précisé | https://groq.com/ |
+| 3 | Hugging Face Inference API (Serverless) (Hugging Face) | API LLM, Image, Embeddings | Monde | Accès gratuit à des milliers de modèles open-source (sous 10B paramètres). Quelques centaines de requêtes par heure. | Modèles limités à ~10B paramètres. Cold starts possibles. Limites de débit par heure. | Cold starts sur les modèles moins populaires. Limites de débit peuvent être contraignantes pour des usages intensifs. | Non précisé | https://huggingface.co/inference-api |
+| 4 | Mistral AI Free Experiment Tier (Mistral AI) | API LLM | Monde | Accès rate-limited à tous les modèles Mistral pour évaluation et prototypage. Pas de carte bancaire requise. | Limites de débit (~1 RPS, 30 RPM). Pas suffisant pour la production. | Les limites de débit sont strictes pour la production. Les prompts peuvent être utilisés pour améliorer les modèles. | Non précisé | https://mistral.ai/technology/api/ |
+| 5 | OpenAI API Free Credits (OpenAI) | API LLM | Monde | Crédits d'essai initiaux (historiquement $5-$18) pour tester les modèles GPT-4o Mini, GPT-3.5 Turbo. | Crédits limités et expirant après 3 mois. Limites de débit strictes. Accès aux modèles avancés (GPT-4o, GPT-5) payant. | Les crédits sont temporaires et s'épuisent rapidement. Nécessite une carte bancaire pour dépasser les crédits gratuits. | Non précisé | https://openai.com/api/ |
+| 6 | Anthropic Claude API Free Credits (Anthropic) | API LLM | Monde | Crédits initiaux pour les nouveaux comptes API. | Montant des crédits et durée non précisés. Pas de free tier API continu. | Pas de free tier API continu, nécessite un paiement dès l'épuisement des crédits initiaux. | Non précisé | https://www.anthropic.com/api |
+| 7 | Together AI Signup Credits (Together AI) | API LLM (Inference) | Monde | Crédits d'inscription ($25-$50) pour accéder à plus de 200 modèles open-source. | Crédits d'essai avec expiration typique de 30-90 jours. Programme startup jusqu'à $50k (nécessite éligibilité). | Les crédits d'inscription sont limités dans le temps. Le programme startup peut nécessiter une validation. | Non précisé | https://api.together.ai/ |
+| 8 | Cloudflare Workers AI (Cloudflare) | API Image Generation, LLM | Monde | 10,000 Neurons par jour gratuits pour l'inférence (incluant image et LLM). Accès à plus de 100 modèles. | Quota journalier. Nécessite un plan Workers payant ($5/mois) pour dépasser le quota gratuit. | Le quota gratuit est limité. Nécessite un plan payant pour une utilisation plus poussée. | Non précisé | https://developers.cloudflare.com/workers-ai/ |
+| 9 | Replicate API Free Credits (Replicate) | API Image, Video, Audio Generation | Monde | Crédits de calcul gratuits limités pour tester les modèles hébergés par la communauté. | Crédits limités. La disponibilité et les performances des modèles peuvent varier. | Les crédits sont limités et peuvent s'épuiser rapidement. La performance dépend des modèles hébergés. | Non précisé | https://replicate.com/ |
+| 10 | Pixazo Free Tier (Image, Video, Audio) (Pixazo) | API Image, Video, Audio Generation | Monde | Accès gratuit aux API de génération d'images (Flux Schnell, Stable Diffusion 3.5, SDXL), vidéo (LTX) et audio (Pixazo Tracks). | Non précisé, mais implicitement limité pour un usage gratuit. | Les limites exactes du free tier ne sont pas clairement détaillées. | Non précisé | https://pixazo.com/ |
+| 11 | Vast.ai Startup Program (Vast.ai) | GPU Cloud | Monde | $2,500 en crédits GPU gratuits pour les startups éligibles. | Nécessite une application et une validation. Les crédits sont liés à la dépense. | Le programme est axé sur les startups et nécessite une application. Les crédits sont un match de dépenses, pas un don pur. | Non précisé | https://vast.ai/startup-program |
+| 12 | Nebius AI Lift Program (via NVIDIA Inception) (Nebius) | GPU Cloud, Inference Credits | Monde | Jusqu'à $150,000 en crédits cloud + $10,000 en crédits d'inférence pour les membres NVIDIA Inception éligibles. | Nécessite l'adhésion au programme NVIDIA Inception. Les crédits sont basés sur les besoins en calcul. | Conditionné par l'adhésion à NVIDIA Inception. Le montant exact dépend de la proposition. | Non précisé | https://nebius.com/ai-lift |
 
 ## Les 5 meilleurs pour usage réel
 
-- Prototypage rapide d'applications IA avec des LLMs et des modèles open-source.
-- Tests d'inférence à la périphérie (edge) avec Cloudflare Workers AI.
-- Développement et test d'agents IA simples avec des quotas quotidiens généreux.
-- Exploration de l'écosystème des modèles open-source via Hugging Face et Groq.
-- Déploiement et test d'applications web/API avec des plateformes PaaS comme Railway.
+- Prototypage rapide d'applications LLM avec Gemini API.
+- Tests de performance d'inférence LLM avec Groq.
+- Expérimentation avec une large gamme de modèles open-source via Hugging Face ou Together AI.
+- Génération d'images et de vidéos pour des prototypes créatifs avec Pixazo ou Replicate.
+- Accès à des ressources GPU substantielles pour l'entraînement ou l'inférence via Vast.ai ou Nebius.
 
 ## Les 5 plus risqués / instables
 
-- Railway: Nécessite une carte bancaire pour le free trial et le passage au payant est rapide.
-- OpenAI: Crédits d'essai limités et expirant, accès aux modèles avancés payant.
-- Cohere: Le quota de 1000 appels/mois est vite atteint, et l'usage trial est non-commercial.
-- Fly.io: N'offre plus de free tier généraliste, les coûts peuvent vite grimper avec l'usage réel.
-- Mistral AI: Les détails du free tier sont souvent flous, nécessitant une inscription pour confirmation.
+- Les crédits d'essai OpenAI et Anthropic sont limités dans le temps et s'épuisent rapidement.
+- Les free tiers de Mistral AI et Groq, bien qu'utiles, sont strictement limités pour la production.
+- Les offres startup (Vast.ai, Nebius) nécessitent une application et une validation, et ne sont pas toujours immédiates.
+- La disponibilité et les performances des modèles sur les plateformes d'inférence communautaires (Replicate) peuvent varier.
+- Les offres vidéo gratuites (Pixazo, ZSky AI) ont souvent des limites cachées ou des quotas journaliers stricts.
 
 ## À surveiller de près
 
-- RunPod & Vast.ai: Surveiller les évolutions des programmes startup et les offres pay-as-you-go pour les GPUs.
-- Google AI Studio: Continuer à suivre l'évolution des limites du free tier Gemini pour une utilisation production.
-- Groq: Observer l'élargissement du catalogue de modèles et l'évolution des limites du free tier.
-- Hugging Face: Suivre les améliorations du Serverless Inference API et les offres PRO.
-- Requesty: Vérifier la pérennité du free tier et l'élargissement potentiel du catalogue de modèles.
+- Surveiller les évolutions des quotas et des modèles disponibles sur les free tiers de Google Gemini et Groq.
+- Évaluer l'ajout de nouveaux modèles et l'amélioration des performances sur Hugging Face Inference API.
+- Suivre les programmes de crédits startup pour Vast.ai et Nebius, qui offrent un accès GPU significatif.
+- Observer les nouvelles offres dans la génération vidéo et audio, un domaine en évolution rapide.
+- Rester attentif aux changements de politique de tarification et de gratuité des grands fournisseurs comme OpenAI et Mistral.
 
 ## Sources critiques utilisées
 
-- Google AI Studio / Vertex AI: https://ai.google.dev/
-- OpenAI: https://platform.openai.com/
-- Hugging Face: https://huggingface.co/inference-api
-- Cohere: https://cohere.com/pricing
+- Google AI Studio: https://ai.google.dev/
 - Groq: https://groq.com/
-- RunPod: https://www.runpod.io/
-- Railway: https://railway.app/
+- Hugging Face Inference API: https://huggingface.co/inference-api
+- Mistral AI: https://mistral.ai/technology/api/
+- OpenAI API: https://openai.com/api/
+- Anthropic API: https://www.anthropic.com/api
+- Together AI: https://api.together.ai/
 - Cloudflare Workers AI: https://developers.cloudflare.com/workers-ai/
+- Replicate: https://replicate.com/
+- Pixazo: https://pixazo.com/
 - Vast.ai: https://vast.ai/startup-program
-- Mistral AI: https://mistral.ai/platform/
-- Requesty: https://requesty.ai/
+- Nebius: https://nebius.com/ai-lift
