@@ -1,143 +1,145 @@
 # Changements veille bons plans IA
 
-- Généré le : `2026-10-16T06:15:31+00:00`
-- Nouvelles offres : `8`
-- Offres modifiées : `4`
-- Offres disparues : `8`
+- Généré le : `2026-10-27T08:00:03+00:00`
+- Nouvelles offres : `10`
+- Offres modifiées : `2`
+- Offres disparues : `10`
 
 ## Nouvelles offres
 
-### 🆕 Google Gemini API (via AI Studio) — Google
-- Type : API LLM
-- Région : Monde
-- Score usage : 5/5
-- Gain : Accès gratuit et continu aux modèles Gemini Flash et Pro. Généreux quotas de requêtes/jour et tokens/jour. Pas de carte bancaire requise pour AI Studio.
-- Limites : Limites de débit plus basses que les plans payants. Nécessite Vertex AI pour les charges de production.
-- Pièges : Les limites de débit peuvent être un goulot d'étranglement pour des usages simultanés.
-- Validité : Non précisé
-- Lien : https://ai.google.dev/
-
-### 🆕 Mistral AI - Experiment Free Tier — Mistral AI
-- Type : API LLM
+### 🆕 Crédits Gratuits pour Développeurs IA (AMD AI Developer Program) — AMD / Fireworks AI
+- Type : Crédits API / GPU Cloud
 - Région : Monde
 - Score usage : 4/5
-- Gain : Quota gratuit substantiel pour développeurs individuels. ~1 req/sec, 500,000 tokens/min, 1,000,000,000 tokens/mois. Inclut l'accès aux modèles Mistral et Codestral.
-- Limites : Nécessite une vérification par téléphone et l'acceptation de l'utilisation des données pour l'entraînement.
-- Pièges : La vérification par téléphone peut être un obstacle. L'opt-in pour l'entraînement des données peut être une préoccupation pour la confidentialité.
-- Validité : Non précisé
-- Lien : https://mistral.ai/platform/
+- Gain : $50 en crédits Fireworks AI pour l'inférence LLM gérée, ou $100 en crédits AMD Developer Cloud pour accès GPU bare-metal.
+- Limites : Application requise, profil public (GitHub/LinkedIn) nécessaire. Crédits Fireworks valides 90 jours après émission.
+- Pièges : Montants et termes sujets à changement. Nécessite une application et une approbation.
+- Validité : Non précisé (vérifier AMD AI Developer Program)
+- Lien : https://www.amd.com/en/developer/ai/developer-program.html
 
-### 🆕 Hugging Face Inference API (Free Tier) — Hugging Face
-- Type : API LLM / Inference Provider
-- Région : Monde
-- Score usage : 2/5
-- Gain : 0.10$ de crédit mensuel pour utiliser les Inference Providers. Accès à des milliers de modèles open-source.
-- Limites : Le crédit est très faible et s'épuise rapidement. Les limites de requêtes par heure ont été supprimées au profit du système de crédit.
-- Pièges : Le crédit mensuel de 0.10$ est extrêmement limité pour toute utilisation sérieuse.
-- Validité : Non précisé
-- Lien : https://huggingface.co/inference-api
-
-### 🆕 RunPod Starter Tier — RunPod
-- Type : GPU Cloud
+### 🆕 Crédits Gratuits OpenAI API (via AI Perks) — OpenAI / AI Perks
+- Type : Crédits API LLM
 - Région : Monde
 - Score usage : 4/5
-- Gain : 1000$ de crédits pour les membres acceptés du Starter Tier. Utilisables sur Pods, Serverless, Clusters, Public Endpoints, Storage.
-- Limites : Application sélective. Le financement par capital-risque est fortement préféré. Principalement pour les nouveaux clients.
-- Pièges : L'application est sélective et privilégie les startups financées par capital-risque, ce qui peut être un obstacle pour les freelances/solo builders sans financement.
-- Validité : Non précisé
-- Lien : https://www.runpod.io/startup-program
+- Gain : $5 de crédits gratuits pour nouveaux comptes (valides 3 mois). Programmes supplémentaires offrant $500 à $50,000+.
+- Limites : Les $5 initiaux sont sans carte bancaire. Les programmes plus importants peuvent avoir des conditions spécifiques.
+- Pièges : Les $5 initiaux sont limités et expirent rapidement. L'accès aux programmes plus importants nécessite de suivre des guides spécifiques.
+- Validité : Non précisé (vérifier AI Perks)
+- Lien : https://www.aiprks.com/openai-free-credits
 
-### 🆕 Fireworks AI - AMD AI Developer Program — Fireworks AI
-- Type : API LLM / Inference Provider
+### 🆕 AI Builder Program Nebius — Nebius
+- Type : Crédits Cloud / Formation
 - Région : Monde
-- Score usage : 3/5
-- Gain : 50$ de crédits Fireworks AI pour l'inférence LLM managée. Valide pendant 90 jours après émission.
-- Limites : Nécessite un profil public (GitHub, LinkedIn). Pas de carte bancaire requise. L'approbation prend environ 3 jours ouvrables.
-- Pièges : Les crédits expirent après 90 jours. L'approbation n'est pas garantie.
-- Validité : Non précisé
-- Lien : https://www.amd.com/en/developer/ai-developer-program.html
+- Score usage : 4/5
+- Gain : +$400 en crédits sur la plateforme Nebius, blueprints, accès Nebius Academy et cours NVIDIA (certifications à $1).
+- Limites : Programme gratuit pour développeurs construisant sur des modèles ouverts. Accès aux heures de bureau avec les ingénieurs.
+- Pièges : Les crédits sont utilisables sur la pile Nebius. L'utilité dépend de l'écosystème Nebius.
+- Validité : Non précisé (vérifier le site Nebius)
+- Lien : https://nebius.com/en/about/ai-builder-program
 
-### 🆕 Together AI - New User Credits — Together AI
-- Type : API LLM / Inference Provider
+### 🆕 AWS Activate Credits — Amazon Web Services (AWS)
+- Type : Crédits Cloud / GPU
 - Région : Monde
-- Score usage : 3/5
-- Gain : Crédits gratuits à l'inscription (25$-50$). Accès à plus de 100 modèles open-source.
-- Limites : Les crédits sont des crédits d'essai avec une durée de vie typique de 30-90 jours.
-- Pièges : Les crédits sont des crédits d'essai et expirent. Le programme Startup Accelerator est plus conséquent mais nécessite une application et une validation.
-- Validité : Non précisé
-- Lien : https://api.together.ai/
+- Score usage : 4/5
+- Gain : Jusqu'à $200,000 en crédits AWS Activate pour startups. Crédits utilisables sur Amazon Bedrock.
+- Limites : Éligibilité : pré-Series B, site web, fondé il y a moins de 10 ans, compte AWS sur plan payant. Les crédits sont utilisables sur les modèles tiers de Bedrock.
+- Pièges : Nécessite une affiliation à un fournisseur Activate pour le Portfolio Tier. Les crédits expirent (généralement 1-2 ans). Les crédits supplémentaires pour startups IA nécessitent un Account Manager.
+- Validité : Non précisé (vérifier AWS Activate)
+- Lien : https://aws.amazon.com/startups/activate/
 
-### 🆕 Anthropic API - Initial Credits — Anthropic
-- Type : API LLM
+### 🆕 Cloudflare Workers AI Free Tier — Cloudflare
+- Type : API IA (Inférence Serverless)
+- Région : Monde
+- Score usage : 4/5
+- Gain : 10,000 Neurons/jour gratuits (partagés). Accès à plus de 50 modèles sur le free tier.
+- Limites : Pas de carte bancaire requise. Les limites s'appliquent par jour. Au-delà, facturation au tarif $0.011/1000 Neurons sur plan Workers payant.
+- Pièges : Les 10,000 Neurons/jour sont une limite globale. L'utilisation commerciale n'est pas clairement documentée. Certains modèles avancés peuvent nécessiter un plan payant.
+- Validité : Permanent
+- Lien : https://developers.cloudflare.com/workers-ai/platform/pricing/
+
+### 🆕 Free Tier Hugging Face Inference API — Hugging Face
+- Type : API IA (Inférence)
 - Région : Monde
 - Score usage : 2/5
-- Gain : Crédits gratuits initiaux pour les nouveaux comptes API (montant variable).
-- Limites : Pas de free tier permanent. Les crédits sont à usage unique et expirent. Nécessite une vérification par SMS (numéros VoIP/Google Voice non acceptés).
-- Pièges : Les crédits sont limités et expirent rapidement. Pas de free tier continu. La vérification par SMS peut être un obstacle.
-- Validité : Non précisé
-- Lien : https://www.anthropic.com/api
+- Gain : $0.10 de crédit mensuel pour les appels aux Inference Providers. 1000 appels API/5 min pour le Hub.
+- Limites : Le crédit de $0.10 est partagé entre les fournisseurs d'inférence. Le PRO plan ($9/mois) inclut $2 de crédit.
+- Pièges : Le crédit gratuit est très faible. Les limites de taux pour l'API d'inférence ne sont plus clairement documentées et dépendent des fournisseurs partenaires.
+- Validité : Permanent
+- Lien : https://huggingface.co/pricing
 
-### 🆕 OpenAI API - Signup Credits — OpenAI
-- Type : API LLM
+### 🆕 Railway Free Tier & Trial — Railway
+- Type : Plateforme de déploiement
 - Région : Monde
-- Score usage : 2/5
-- Gain : Crédits gratuits pour les nouveaux comptes (historiquement 5$-18$).
-- Limites : Les crédits expirent. Pas de free tier permanent. Les limites de débit sont très restreintes sur le tier gratuit.
-- Pièges : Les crédits expirent rapidement. Le tier gratuit est très limité en débit et en accès aux modèles les plus récents.
-- Validité : Non précisé
-- Lien : https://platform.openai.com/
+- Score usage : 3/5
+- Gain : Essai de 30 jours avec $5 de crédits. Plan gratuit permanent avec $1 de crédit mensuel (non reportable).
+- Limites : Essai : $5 de crédits, 30 jours max. Plan gratuit : $1/mois, 1 vCPU/0.5 GB RAM par service, 1 projet, 3 services/projet.
+- Pièges : Nécessite une carte bancaire pour l'essai gratuit (depuis août 2023). Le plan gratuit est très limité pour la production. Les services sont mis en pause si les crédits sont épuisés.
+- Validité : Permanent (plan gratuit), 30 jours (essai)
+- Lien : https://railway.app/pricing
+
+### 🆕 Crédits Gratuits pour Développeurs (Google Cloud) — Google Cloud Platform (GCP)
+- Type : Crédits Cloud / GPU
+- Région : Monde
+- Score usage : 4/5
+- Gain : $300 en crédits gratuits pour les nouveaux clients.
+- Limites : Crédits utilisables sur tous les services GCP, y compris les GPUs. Doivent être utilisés dans les 90 jours.
+- Pièges : Nécessite d'être un nouveau client. Les crédits expirent rapidement. L'approbation de quota GPU peut être nécessaire séparément.
+- Validité : 90 jours après l'inscription
+- Lien : https://cloud.google.com/offers/cloud-free-tier
+
+### 🆕 Crédits Gratuits pour Développeurs (Microsoft Azure) — Microsoft Azure
+- Type : Crédits Cloud / GPU
+- Région : Monde
+- Score usage : 4/5
+- Gain : $200 en crédits gratuits pour les nouveaux clients.
+- Limites : Crédits utilisables sur les services Azure, y compris les GPUs. Doivent être utilisés dans les 30 jours.
+- Pièges : Nécessite d'être un nouveau client. Les crédits expirent rapidement. L'approbation de quota GPU peut être nécessaire séparément.
+- Validité : 30 jours après l'inscription
+- Lien : https://azure.microsoft.com/en-us/free/
+
+### 🆕 Crédits Gratuits pour Développeurs (Oracle Cloud) — Oracle Cloud Infrastructure (OCI)
+- Type : Crédits Cloud / GPU
+- Région : Monde
+- Score usage : 4/5
+- Gain : $300 en crédits gratuits pour les nouveaux clients.
+- Limites : Crédits utilisables sur les services OCI, y compris les GPUs. Doivent être utilisés dans les 30 jours.
+- Pièges : Nécessite d'être un nouveau client. Les crédits expirent rapidement. L'approbation de quota GPU peut être nécessaire séparément.
+- Validité : 30 jours après l'inscription
+- Lien : https://www.oracle.com/cloud/free/
 
 
 ## Offres modifiées
 
-### ♻️ Groq API Free Tier — Groq
-- Type : API LLM / Inference Provider
+### ♻️ Programme Startup Runpod — Runpod
+- Type : Crédits GPU Cloud
 - Région : Monde
 - Score usage : 4/5
-- Gain : Accès gratuit à tous les modèles open-weight (Llama, Mistral, etc.) avec des vitesses d'inférence très élevées (jusqu'à 1000 tokens/sec). 30 RPM, 14,400 RPD, 6,000 TPM, 100,000 TPD (par organisation). Inclut Whisper API…
-- Limites : Limites par organisation, pas par clé API. Modèles open-weight uniquement.
-- Pièges : Les limites de tokens quotidiens peuvent être atteintes avant les limites de requêtes pour les charges de travail de chat. Les modèles Llama 3.3 70B et Llama 3.1 8B ont été retirés le 16 août 2026.
-- Validité : Non précisé
+- Gain : $1000 en crédits pour le Starter Tier (pré-Series A). $25k bonus pour $50k engagés (Growth Tier).
+- Limites : Starter Tier : pré-Series A éligible. Growth Tier : engagement de $50k, contrat 12 mois. Crédits utilisables sur tous les produits Runpod.
+- Pièges : Programme sélectif. Le Growth Tier nécessite un engagement financier important. Le Starter Tier privilégie les startups ayant levé des fonds.
+- Validité : Non précisé (vérifier le site Runpod)
+- Lien : https://www.runpod.io/startup-program
+
+### ♻️ Free Tier Groq API — Groq
+- Type : API LLM (Inférence Rapide)
+- Région : Monde
+- Score usage : 5/5
+- Gain : 30,000 tokens/minute, 14,400 requêtes/jour sur une sélection de modèles (Llama 3.1 8B, Llama 4 Scout, Qwen3 32B, etc.).
+- Limites : Pas de carte bancaire requise. Limites par organisation, pas par clé API. Modèles open-source uniquement.
+- Pièges : La sélection de modèles est limitée. Les limites s'appliquent au niveau de l'organisation.
+- Validité : Permanent
 - Lien : https://groq.com/
-
-### ♻️ OpenRouter Free Tier — OpenRouter
-- Type : API LLM Router
-- Région : Monde
-- Score usage : 4/5
-- Gain : Accès à 20+ modèles gratuits (via plusieurs fournisseurs) avec une seule clé API. 20 RPM, 50 RPD (ou 1000 RPD après $10 d'achat). Pas de carte bancaire requise pour le tier gratuit.
-- Limites : Les limites de requêtes quotidiennes sont très basses (50 RPD).
-- Pièges : Les limites de requêtes quotidiennes sont très restrictives pour un usage sérieux.
-- Validité : Non précisé
-- Lien : https://openrouter.ai/
-
-### ♻️ Cloudflare Workers AI — Cloudflare
-- Type : API LLM / Inference Provider
-- Région : Monde
-- Score usage : 3/5
-- Gain : 10,000 'Neurons' gratuits par jour pour l'inférence IA. Permet d'exécuter des modèles sur l'infrastructure Cloudflare.
-- Limites : Les 'Neurons' sont une unité de mesure spécifique à Cloudflare; la conversion en tokens ou requêtes dépend du modèle utilisé.
-- Pièges : Le concept de 'Neurons' peut être abstrait et difficile à quantifier pour des modèles spécifiques.
-- Validité : Non précisé
-- Lien : https://www.cloudflare.com/products/workers-ai/
-
-### ♻️ Nebius AI Builder Program — Nebius
-- Type : API LLM / GPU Cloud / Agent Platform
-- Région : Monde
-- Score usage : 4/5
-- Gain : Plus de 400$ de crédits sur la plateforme Nebius. Inclut des blueprints pour construire des agents, accès à Nebius Academy et NVIDIA courses, et office hours avec les ingénieurs.
-- Limites : Les crédits sont utilisables sur la plateforme Nebius. Les conditions exactes des crédits doivent être vérifiées.
-- Pièges : Les conditions exactes des crédits et leur durée de validité ne sont pas toujours claires.
-- Validité : Non précisé
-- Lien : https://nebius.com/ai-builder-program
 
 
 ## Offres disparues du top
 
-- Crédits Gratuits pour l'API Gemini — Google
-- Crédits d'Essai OpenAI — OpenAI
-- Crédits d'Essai Anthropic (Claude) — Anthropic
-- Free Tier Hugging Face Inference API — Hugging Face
-- Crédits d'Essai Together AI — Together AI
-- Free Tier Railway — Railway
-- Crédits Gratuits pour GPU Cloud (Google Cloud) — Google Cloud
-- Free Tier Hugging Face ZeroGPU Spaces — Hugging Face
+- Google Gemini API (via AI Studio) — Google
+- OpenRouter Free Tier — OpenRouter
+- Mistral AI - Experiment Free Tier — Mistral AI
+- Cloudflare Workers AI — Cloudflare
+- Hugging Face Inference API (Free Tier) — Hugging Face
+- Nebius AI Builder Program — Nebius
+- Fireworks AI - AMD AI Developer Program — Fireworks AI
+- Together AI - New User Credits — Together AI
+- Anthropic API - Initial Credits — Anthropic
+- OpenAI API - Signup Credits — OpenAI
